@@ -10,6 +10,7 @@
 /* Assembly functions to emulate */
 int add_a(int a, int b);
 int add2_a(int a, int b);
+int addsub_a(int a, int b);
 int sub_a(int a, int b);
 
 /* The complete machine state */
@@ -26,7 +27,7 @@ void arm_state_init(struct arm_state *as, unsigned int *func,
 {
     int i;
 
-    /* Zero out all arm state */
+    /* Zero out all registers */
     for (i = 0; i < NREGS; i++) {
         as->regs[i] = 0;
     }
@@ -182,10 +183,11 @@ int main(int argc, char **argv)
     arm_state_init(&state, (unsigned int *) add2_a, 1, 2, 0, 0);
     arm_state_print(&state);
     r = armemu(&state);
-    printf("armemu(add2_a(1,2)) = %d\n", r);
+    printf("armemu(add2_a(1,2)) = %d\n", r);  
+    printf("Made it here");
 
     /* Emulate sub */
-    arm_state_init(&state, (unsigned int *) sub_a, 1, 2, 0, 0);
+    arm_state_init(&state, (unsigned int *) sub_a, 2, 1, 0, 0);
     arm_state_print(&state);
     r = armemu(&state);
     printf("armemu(sub_a(1,2)) = %d\n", r);

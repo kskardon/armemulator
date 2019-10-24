@@ -1,6 +1,7 @@
 PROGS = analyze armemu
 
-OBJS_ARMEMU = add_a.o add2_a.o
+OBJS_ANALYSE = addsub_a.o
+OBJS_ARMEMU = add_a.o add2_a.o sub_a.o
 
 CFLAGS = -g
 
@@ -19,4 +20,4 @@ armemu : armemu.c ${OBJS_ARMEMU}
 	gcc ${CFLAGS} -o $@ $^
 
 clean :
-	rm -rf ${PROGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
+	rm -rf ${PRGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
