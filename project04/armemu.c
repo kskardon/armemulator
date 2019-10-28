@@ -10,7 +10,6 @@
 /* Assembly functions to emulate */
 int add_a(int a, int b);
 int add2_a(int a, int b);
-int addsub_a(int a, int b);
 int sub_a(int a, int b);
 
 /* The complete machine state */
@@ -66,17 +65,6 @@ void arm_state_print(struct arm_state *as)
     printf("cpsr = %X\n", as->cpsr);
 }
 
-bool is_sub_inst(unsigned int iw)
-{
-    unsigned int op;
-    unsigned int opcode;
-
-    op = (iw >> 26) & 0b11;
-    opcode = (iw >> 21) & 0b1111;
-
-    return (op == 0) && (opcode == 0b0010);
-}
-
 void armemu_sub(struct arm_state *state)
 {
     unsigned int iw;
@@ -92,6 +80,28 @@ void armemu_sub(struct arm_state *state)
     if (rd != PC) {
         state->regs[PC] = state->regs[PC] + 4;
     }
+} 
+bool is_sub_inst(unsigned int iw) {
+    
+    unsigned int op;
+    unsigned int opcode;
+
+    op = (iw >> 26) & 0b11;
+    opcode = (iw >> 21) & 0b1111;
+
+    return (op == 0) && (opcode == 0b0010);
+}
+
+bool is_mul_inst(unsigned int iw) {
+    
+    unsigned int op;
+    unsigned int opcode;
+
+    op = (iw >> 26) & 0b11;
+    opcode = (iw >> 21) & 0b1111;
+
+    return (op == 0) && (opcode == 0b0010);
+
 }
 
 bool is_add_inst(unsigned int iw)
@@ -142,10 +152,20 @@ void armemu_bx(struct arm_state *state)
     state->regs[PC] = state->regs[rn];
 }
 
+bool is_b_inst(unsigned int iw)
+{
+    unsigned int b_code;
+    
+    b_code = (iw >> 24) & 0xF;
+
+    return (b_code == 0b1010);
+
+}
+
 void armemu_one(struct arm_state *state)
 {
     unsigned int iw;
-    /* Gets value pointed to at PC*/ 
+    
     iw = *((unsigned int *) state->regs[PC]);
 
     if (is_bx_inst(iw)) {
@@ -183,10 +203,8 @@ int main(int argc, char **argv)
     arm_state_init(&state, (unsigned int *) add2_a, 1, 2, 0, 0);
     arm_state_print(&state);
     r = armemu(&state);
-    printf("armemu(add2_a(1,2)) = %d\n", r);  
-    printf("Made it here");
+    printf("armemu(add2_a(1,2)) = %d\n", r);
 
-    /* Emulate sub */
     arm_state_init(&state, (unsigned int *) sub_a, 2, 1, 0, 0);
     arm_state_print(&state);
     r = armemu(&state);
