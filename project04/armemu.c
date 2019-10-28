@@ -167,20 +167,53 @@ void armemu_b(struct arm_state)
     unsigned int iw;
     unsigned int cond;
     unsigned int offset;
+    unsigned int cpsr;
+
+    /* Put cpsr into struct */
 
     iw = *((unsigned int *) state->regs[PC]);
+    cond = (iw >> 28) & 0b1111;
+    cpsr = state->cpsr;
+    offset = (iw << 8);
+    offset = (iw >> 8);
+    
+    switch (cond)
+    {
+        0b0000: 
+	    /* Compare flags from cpsr */
 
-    /* Change the program counter to the new address */
+	0b0001:
+
+	0b1011:
+
+	0b1100;
+
+        default:
+    }
 
     if(is_bl_inst(iw)){
         state->regs[LR] = state->regs[PC]+4;
-
     }
 
+    /* Change the PC to the new address now */
+ 
 
-    offset = (iw << 8);
-    offset = (iw >> 8);
+    
 
+
+}
+
+bool cond_check(struct arm_state)
+{
+    unsigned int iw;
+    unsigned int cond;
+    
+
+
+    iw = *((unsigned int *) state->regs[PC]);
+    cond = (iw >> 28) & 0b1111;
+
+    
 
 }
 
