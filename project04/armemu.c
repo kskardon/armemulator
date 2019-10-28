@@ -156,7 +156,7 @@ bool is_b_inst(unsigned int iw)
 {
     unsigned int b_code;
     
-    b_code = (iw >> 26) & 0x7;
+    b_code = (iw >> 25) & 0x7;
 
     return (b_code == 0b101);
 
@@ -165,7 +165,8 @@ bool is_b_inst(unsigned int iw)
 void armemu_b(struct arm_state)
 {
     unsigned int iw;
-    unsigned int rn;
+    unsigned int cond;
+    unsigned int offset;
 
     iw = *((unsigned int *) state->regs[PC]);
 
@@ -173,9 +174,14 @@ void armemu_b(struct arm_state)
 
     if(is_bl_inst(iw)){
         state->regs[LR] = state->regs[PC]+4;
-    } else {
 
     }
+
+
+    offset = (iw << 8);
+    offset = (iw >> 8);
+
+
 }
 
 
