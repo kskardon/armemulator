@@ -156,10 +156,48 @@ bool is_b_inst(unsigned int iw)
 {
     unsigned int b_code;
     
-    b_code = (iw >> 24) & 0xF;
+    b_code = (iw >> 26) & 0x7;
 
-    return (b_code == 0b1010);
+    return (b_code == 0b101);
 
+}
+
+void armemu_b(struct arm_state)
+{
+    unsigned int iw;
+    unsigned int rn;
+
+    iw = *((unsigned int *) state->regs[PC]);
+
+    /* Change the program counter to the new address */
+
+    if(is_bl_inst(iw)){
+        state->regs[LR] = state->regs[PC]+4;
+    } else {
+
+    }
+}
+
+
+
+bool is_bl_inst(struct arm_state *state) 
+{
+    unsigned int bl_code;
+
+    bl_code = (iw >> 24) & 0xF;
+
+    return (bl_code == 0b1011);
+
+}
+
+void armemu_bl(unsigned int iw)
+{
+    unsigned int iw;
+
+    iw = *((unsigned int *) state->regs[PC]);
+
+    state->regs[PC] = state->regs[r14];
+    
 }
 
 void armemu_one(struct arm_state *state)
