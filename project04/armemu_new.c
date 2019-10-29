@@ -15,19 +15,34 @@ int fib_iter_a(int n);
 int fib_rec_a(int n);
 int strlen_a(char *s);
 
-/* The complete machine as */
-struct arm_state {
-    unsigned int regs[NREGS];
-    unsigned int cpsr;
-    unsigned char stack[STACK_SIZE];
-};
-
 /* The complete cpsr as */
 struct cpsr_as {
     int N;
     int Z;
     int C;
     int V;
+};
+
+/* The complete machine as */
+struct arm_state {
+    unsigned int regs[NREGS];
+    struct cpsr_as cpsr;
+    unsigned char stack[STACK_SIZE];
+    
+    /* Dynamic Analysis: Three Types of Processing */
+    int data_processing_count;
+    int memory_count;
+    int branch_count;
+
+    /* Dynamic Analysis */
+    int branches_taken;
+    int branches_not_taken;
+
+    /* Cache values */
+    int request_count;
+    int hit_count;
+    int miss_count;
+
 };
 
 /* Initialize cpsr as */
@@ -142,35 +157,35 @@ void armemu_mul(struct arm_state *as)
 
 bool is_data_processing_inst(unsigned int iw) 
 {
-	unsigned int dp_code;
+    unsigned int dp_code;
 
-	dp_code = (iw >> 26) & 0b11;
+    dp_code = (iw >> 26) & 0b11;
 
-	return (dp_code == 0b00);
+    return (dp_code == 0b00);
 }
 
-void armemu_data_processing(struct arm_state *as, struct cpsr_as *cpsr)
+void armemu_data_processing(struct arm_state *as)
 {
-	/* Op1 is a/rn and Op2 is b/rm */
-	unsigned int iw = *((unsigned int *) as->regs[PC]);
-	unsigned int cond = (iw >> 28) & 0b1111;
-	unsigned int i_bit = (iw >> 25) & 0b1;
-	unsigned int opcode = (iw >> 21) & 0b1111;
-	unsigned int s_bit = (iw >> 20) & 0b1;
-	unsigned int rn = (iw >> 16) & 0b1111;
-	unsigned int rd = (iw >> 12) & 0b1111;
-	unsigned int rm, imm;
-        /* Values for CMP */
-        int cs, bs, result;
-	long long cl, bl;
+    /* Op1 is a/rn and Op2 is b/rm */
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int cond = (iw >> 28) & 0b1111;
+    unsigned int i_bit = (iw >> 25) & 0b1;
+    unsigned int opcode = (iw >> 21) & 0b1111;
+    unsigned int s_bit = (iw >> 20) & 0b1;
+    unsigned int rn = (iw >> 16) & 0b1111;
+    unsigned int rd = (iw >> 12) & 0b1111;
+    unsigned int rm, imm;
+    /* Values for CMP */
+    int cs, bs, result;
+    long long cl, bl;
 	    
     
     /* Setting RM with either immediate value or RM */
-	if(!i_bit) {
-        rm = iw & 0xF;
-	} else {
-        rm = iw & 0xFF;
-	}
+    if(!i_bit) {
+    rm = iw & 0xF;
+    } else {
+    rm = iw & 0xFF;
+    }
     
     switch(opcode) {
         case 0b1101: //mov
@@ -196,11 +211,11 @@ void armemu_data_processing(struct arm_state *as, struct cpsr_as *cpsr)
             cpsr-> V = 0;
 
             if ((cs > 0) && (bs < 0)) {
-                if ((cl + bl) > 0x7FFFFFFF) {
+                if ((cl +(-1 *  bl)) > 0x7FFFFFFF) {
                 cpsr->V = 1;
                 }
             } else if ((cs < 0) && (bs > 0)) {
-                if ((cl + bl) > 0x80000000) {
+                if (((-1 * cl) + bl) > 0x80000000) {
                 cpsr->V = 1;
                 }
             }
@@ -213,7 +228,6 @@ void armemu_data_processing(struct arm_state *as, struct cpsr_as *cpsr)
         as->regs[PC] = as->regs[PC] + 4;
     }
 }
-
 
 
 /* TODO: Do we need this? */
@@ -279,7 +293,7 @@ bool is_b_inst(unsigned int iw)
 
 void armemu_b(struct arm_state *as)
 {
-	unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int cond = (iw >> 28) & 0b1111;
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
@@ -310,10 +324,20 @@ void armemu_b(struct arm_state *as)
 
 
 void armemu_one(struct arm_state *as, struct cpsr_as *cpsr)
-{
+{   
     unsigned int iw;
     
     iw = *((unsigned int *) as->regs[PC]);
+    /* Simulate chache here*
+     * simulate_cache(cache, PC)
+     * PC
+     * slot = get_slot(size, addr)
+     * tag = get_tag(size, addr)
+     * Look at notes to see if this particular address is in the cache or not*/   
+
+    /* Cache data structure... array of cache slots
+     * Cache slot: v bit, tag */
+ 
 
     if (is_bx_inst(iw)) {
         armemu_bx(as);
@@ -340,7 +364,11 @@ unsigned int armemu(struct arm_state *as, struct cpsr_as *cpsr)
 int main(int argc, char **argv)
 {
     struct arm_state as;
+    struct cpsr_as cpsr;
+
+    init_cpsr_as
     unsigned int r;
+    armemu
 
     
     return 0;

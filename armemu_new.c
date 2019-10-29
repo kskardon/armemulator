@@ -195,12 +195,12 @@ void armemu_data_processing(struct arm_state *as, struct cpsr_as *cpsr)
             cpsr-> V = 0;
 
             if ((as > 0) && (bs < 0)) {
-                if ((al + bl) > 0x7FFFFFFF) {
-                cpsr->V = 1;
+                if ((al +(-1* bl)) > 0x7FFFFFFF) {
+                    cpsr->V = 1;
                 }
             } else if ((as < 0) && (bs > 0)) {
-                if ((al + bl) > 0x80000000) {
-                cpsr->V = 1;
+                if (((al * -1) + bl) > 0x80000000) {
+                    cpsr->V = 1;
                 }
             }
             break;
