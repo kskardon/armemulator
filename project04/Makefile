@@ -1,9 +1,6 @@
-PROGS = analyze armemu
+PRGS = fib_iter_a fib_rec_a strlen_a quadratic_a sum_array_a find_max_a 
 
-OBJS_ANALYSE = addsub_a.o
-OBJS_ARMEMU = add_a.o add2_a.o sub_a.o
-
-CFLAGS = -g
+OBJS_ARMEMU = fib_iter_a.o fib_rec_a.o find_max_a.o strlen_a.o sum_array_a.s quadratic_a.s
 
 %.o : %.s
 	as -o $@ $<
@@ -13,11 +10,32 @@ CFLAGS = -g
 
 all : ${PROGS}
 
-analyze : analyze.c ${OBJS_ANALYZE}
-	gcc ${CFLAGS} -o $@ $^
+fib_iter_a : fib_iter_a.s
+	as -o fib_iter_a.o fib_iter_a.s
+
+fib_rec_a : fib_rec_a.s
+	as -o fib_rec_a.o fib_rec_a.s
+
+find_max_a : find_max_a.s
+	as -o find_max_a.o find_max_a.s
+
+strlen_a: strlen_a.s
+	as -o strlen_a.o strlen_a.s
+
+quadratic_a: quadratic_a.s
+	as -o quadratic_a.o quadratic_a.s
+
+sum_array_a : sum_array_a.s
+	as -o sum_array_a.o sum_array_a.s
+
+find_max_a : find_max_a.s
+	as -o find_max_a.o find_max_a.s
 
 armemu : armemu.c ${OBJS_ARMEMU}
 	gcc ${CFLAGS} -o $@ $^
 
+test : armemu
+	./armemu
+
 clean :
-	rm -rf ${PRGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
+	rm -rf armemu ${OBJS_ARMEMU}

@@ -19,6 +19,22 @@ struct arm_state {
     unsigned char stack[STACK_SIZE];
 };
 
+/* The CPSR variables */
+struct cpsr_state {
+    int n;
+    int z;
+    int c;
+    int v;
+};
+/**/
+void init_cpsr_state(struct cpsr_state *cpsr)
+{
+    cpsr->n = 0;
+    cpsr->z = 0;
+    cpsr->c = 0;
+    cpsr->v = 0;
+}
+
 /* Initialize an arm_state struct with a function pointer and arguments */
 void arm_state_init(struct arm_state *as, unsigned int *func,
                     unsigned int arg0, unsigned int arg1,
@@ -80,7 +96,8 @@ void armemu_sub(struct arm_state *state)
     if (rd != PC) {
         state->regs[PC] = state->regs[PC] + 4;
     }
-} 
+}
+
 bool is_sub_inst(unsigned int iw) {
     
     unsigned int op;
@@ -90,18 +107,6 @@ bool is_sub_inst(unsigned int iw) {
     opcode = (iw >> 21) & 0b1111;
 
     return (op == 0) && (opcode == 0b0010);
-}
-
-bool is_mul_inst(unsigned int iw) {
-    
-    unsigned int op;
-    unsigned int opcode;
-
-    op = (iw >> 26) & 0b11;
-    opcode = (iw >> 21) & 0b1111;
-
-    return (op == 0) && (opcode == 0b0010);
-
 }
 
 bool is_add_inst(unsigned int iw)
@@ -162,7 +167,8 @@ bool is_b_inst(unsigned int iw)
 
 }
 
-void armemu_b(struct arm_state)
+
+void armemu_b(struct arm_state *state)
 {
     unsigned int iw;
     unsigned int cond;
@@ -171,16 +177,37 @@ void armemu_b(struct arm_state)
 
     /* Put cpsr into struct */
 
-    iw = *((unsigned int *) state->regs[PC]);
+   /* iw = *((unsigned int *) state->regs[PC]);
     cond = (iw >> 28) & 0b1111;
     cpsr = state->cpsr;
     offset = (iw << 8);
     offset = (iw >> 8);
     
+
+   if(is_bl_inst(iw)){
+        state->regs[LR] = state->regs[PC]+4;
+    }*/
+
+    /* Change the PC to the new address now */
+ 
+
+}
+
+bool cond_check(struct arm_state *state)
+{
+   /* unsigned int iw;
+    unsigned int cpsr;
+    unsigned int cond;
+
+    iw = *((unsigned int *) state->regs[PC]);
+    cond = (iw >> 28) & 0b1111;
+
+
+
     switch (cond)
     {
         0b0000: 
-	    /* Compare flags from cpsr */
+	     Compare flags from cpsr
 
 	0b0001:
 
@@ -189,37 +216,11 @@ void armemu_b(struct arm_state)
 	0b1100;
 
         default:
-    }
-
-    if(is_bl_inst(iw)){
-        state->regs[LR] = state->regs[PC]+4;
-    }
-
-    /* Change the PC to the new address now */
- 
-
-    
-
+    }*/
 
 }
 
-bool cond_check(struct arm_state)
-{
-    unsigned int iw;
-    unsigned int cond;
-    
-
-
-    iw = *((unsigned int *) state->regs[PC]);
-    cond = (iw >> 28) & 0b1111;
-
-    
-
-}
-
-
-
-bool is_bl_inst(struct arm_state *state) 
+bool is_bl_inst(unsigned int iw) 
 {
     unsigned int bl_code;
 
@@ -229,14 +230,14 @@ bool is_bl_inst(struct arm_state *state)
 
 }
 
-void armemu_bl(unsigned int iw)
+void is_data_processing_inst(struxt arm_state *state)
 {
     unsigned int iw;
-
     iw = *((unsigned int *) state->regs[PC]);
 
-    state->regs[PC] = state->regs[r14];
-    
+    if (is_mul_inst(iw)) {
+        armemu_mul(state)
+    }
 }
 
 void armemu_one(struct arm_state *state)
@@ -269,6 +270,9 @@ int main(int argc, char **argv)
 {
     struct arm_state state;
     unsigned int r;
+
+
+
 
     /* Emulate add_a */
     arm_state_init(&state, (unsigned int *) add_a, 1, 2, 0, 0);
