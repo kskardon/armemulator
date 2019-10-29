@@ -23,11 +23,11 @@ sum_array_a : sum_array_a.s
 find_max_a : find_max_a.s
 	as -o find_max_a.o find_max_a.s
 
-armemu : armemu.c ${OBJS_ARMEMU}
-	gcc -o armemu armemu.c ${OBJS_ARMEMU}
+armemu : armemu_new.c ${OBJS_ARMEMU}
+	gcc -o armemu_new armemu_new.c ${OBJS_ARMEMU}
 
-test : armemu
-	./armemu
+test : armemu_new
+	./armemu_new
 
 clean :
-	rm -rf armemu ${OBJS_ARMEMU}
+	rm -rf armemu_new ${OBJS_ARMEMU}
