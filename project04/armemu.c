@@ -12,12 +12,6 @@ int add_a(int a, int b);
 int add2_a(int a, int b);
 int sub_a(int a, int b);
 
-/* The complete machine state */
-struct arm_state {
-    unsigned int regs[NREGS];
-    unsigned int cpsr;
-    unsigned char stack[STACK_SIZE];
-};
 
 /* The CPSR variables */
 struct cpsr_state {
@@ -25,6 +19,14 @@ struct cpsr_state {
     int z;
     int c;
     int v;
+};
+
+/* The complete machine state */
+struct arm_state {
+    unsigned int regs[NREGS];
+    struct cpsr_state cpsr;
+    unsigned char stack[STACK_SIZE];
+
 };
 /**/
 void init_cpsr_state(struct cpsr_state *cpsr)
@@ -167,7 +169,6 @@ bool is_b_inst(unsigned int iw)
 
 }
 
-
 void armemu_b(struct arm_state *state)
 {
     unsigned int iw;
@@ -220,6 +221,84 @@ bool cond_check(struct arm_state *state)
 
 }
 
+bool is_mov_inst(unsigned int iw) {
+
+}
+
+bool is_data_processing_inst(unsigned int iw)
+{
+    unsigned int dp_code;
+
+    dp_code = (iw >> 26) & 0b11;
+
+    return (dp_code == 0b00);
+}
+
+void armemu_data_processing(struct arm_state *as)
+{
+    /* Op1 is a/rn and Op2 is b/rm */
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int cond = (iw >> 28) & 0b1111;
+    unsigned int i_bit = (iw >> 25) & 0b1;
+    unsigned int opcode = (iw >> 21) & 0b1111;
+    unsigned int s_bit = (iw >> 20) & 0b1;
+    unsigned int rn = (iw >> 16) & 0b1111;
+    unsigned int rd = (iw >> 12) & 0b1111;
+    unsigned int rm, imm;
+    /* Values for CMP */
+    int cs, bs, result;
+    long long cl, bl;
+
+
+    /* Setting RM with either immediate value or RM */
+    if(!i_bit) {
+    rm = iw & 0xF;
+    } else {
+    rm = iw & 0xFF;
+    }
+
+    switch(opcode) {
+        case 0b1101: //mov
+            as->regs[rd] = as->regs[rm];
+            break;
+        case 0b0100: //add
+            as->regs[rd] = as->regs[rn] + as->regs[rm];
+            break;
+        case 0b0010: //sub
+            as->regs[rd] = as->regs[rn] - as->regs[rm];
+            break;
+        case 0b1010: //cmp
+            cs = (int) rn;
+            bs = (int) rm;
+            cl = (long long) rn;
+            bl = (long long) rm;
+
+            result = cs - bs;
+
+            cpsr->N = (result < 0);
+            cpsr->Z = (result == 0);
+            cpsr->C = (rm > rn);
+            cpsr-> V = 0;
+
+            if ((cs > 0) && (bs < 0)) {
+                if ((cl +(-1 *  bl)) > 0x7FFFFFFF) {
+                cpsr->V = 1;
+                }
+            } else if ((cs < 0) && (bs > 0)) {
+                if (((-1 * cl) + bl) > 0x80000000) {
+                cpsr->V = 1;
+                }
+            }
+            break;
+
+    }
+
+    if (rd != PC)
+    {
+        as->regs[PC] = as->regs[PC] + 4;
+    }
+}
+
 bool is_bl_inst(unsigned int iw) 
 {
     unsigned int bl_code;
@@ -252,6 +331,8 @@ void armemu_one(struct arm_state *state)
         armemu_add(state);
     } else if (is_sub_inst(iw)) {
 	armemu_sub(state);
+    } else if (is_mov_inst(iw)) {
+        armemu_mov(state);
     }
 }
 
