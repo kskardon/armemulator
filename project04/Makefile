@@ -1,33 +1,30 @@
-PROGS = fib_iter_a fib_rec_a strlen_a quadratic_a sum_array_a find_max_a 
+PROGS = mov_a add_a mul_a sub_a cmp_a
 
-OBJS_ARMEMU = fib_iter_a.o fib_rec_a.o strlen_a.o quadratic_a.s sum_array_a.s find_max_a.s
+OBJS_ARMEMU = mov_a.o add_a.o mul_a.o sub_a.o cmp_a.o
 
 
 all : ${PROGS}
 
-fib_iter_a : fib_iter_a.s
-	as -o fib_iter_a.o fib_iter_a.s
+cmp_a : cmp_a.s
+	as -o cmp_a.o cmp_a.s
 
-fib_rec_a : fib_rec_a.s
-	as -o fib_rec_a.o fib_rec_a.s
+mov_a : mov_a.s
+	as -o mov_a.o mov_a.s
 
-strlen_a: strlen_a.s
-	as -o strlen_a.o strlen_a.s
+add_a : add_a.s
+	as -o add_a.o add_a.s
 
-quadratic_a: quadratic_a.s
-	as -o quadratic_a.o quadratic_a.s
+mul_a: mul_a.s
+	as -o mul_a.o mul_a.s
 
-sum_array_a : sum_array_a.s
-	as -o sum_array_a.o sum_array_a.s
+sub_a: sub_a.s
+	as -o sub_a.o sub_a.s
 
-find_max_a : find_max_a.s
-	as -o find_max_a.o find_max_a.s
+armemu_combined : armemu_combined.c ${OBJS_ARMEMU}
+	gcc -o armemu_combined armemu_combined.c ${OBJS_ARMEMU}
 
-armemu : armemu_new.c ${OBJS_ARMEMU}
-	gcc -o armemu_new armemu_new.c ${OBJS_ARMEMU}
-
-test : armemu_new
-	./armemu_new
+test : armemu_combined
+	./armemu_combined
 
 clean :
-	rm -rf armemu_new ${OBJS_ARMEMU}
+	rm -rf armemu_combined ${OBJS_ARMEMU}

@@ -12,6 +12,7 @@ int mov_a(int a, int b);
 int add_a(int a, int b);
 int sub_a(int a, int b);
 int mul_a(int a, int b);
+int cmp_a(int a, int b);
 
 /* The complete cpsr */
 struct cpsr_state {
@@ -65,7 +66,7 @@ void arm_state_init(struct arm_state *as, unsigned int *func,
     }
 
     /* Zero out CPSR */
-    as->cpsr = 0;
+    init_cpsr_state(&as->cpsr);
 
     /* Zero out the stack */
     for (i = 0; i < STACK_SIZE; i++) {
@@ -124,7 +125,7 @@ bool is_mul_inst(unsigned int iw)
     //unsigned int opcode;
  
     unsigned int op;
-    unsigned int check;
+    unsigned int opcode;
  
     op = (iw >> 22) & 0b111111; //getting the op code
     opcode = (iw >> 4) & 0b1111; //getting bits 4 through 7
@@ -258,15 +259,26 @@ void armemu_data_processing(struct arm_state *as)
     /* Values for CMP */
     int cs, bs, result;
     long long cl, bl;
+
+    printf("WORD: %u\n", iw);
+    printf("COND: %u\n", cond);
+    printf("i_bit: %u\n", i_bit);
+    printf("opcode: %u\n", opcode);
+    printf("s_bit: %u\n", s_bit);
+    printf("Rd: %u\n", rd);
+
 	    
     
     /* Setting RM with either immediate value or RM */
     if(!i_bit) {
-    rm = iw & 0xF;
+        rm = iw & 0xF;
     } else {
-    rm = iw & 0xFF;
+        rm = iw & 0xFF;
     }
-    
+    printf("Rm is %u\n", rm);
+    printf("Rn is %u\n", rn);
+
+
     switch(opcode) {
         case 0b1101: //mov
             as->regs[rd] = as->regs[rm];
@@ -278,8 +290,8 @@ void armemu_data_processing(struct arm_state *as)
             as->regs[rd] = as->regs[rn] - as->regs[rm];
             break;
         case 0b1010: //cmp
-            cmp(state->cpsr, rn, rm);
-	    cond_check(state->cpsr, rn, rm);
+            cmp(&as->cpsr, as->regs[rn], as->regs[rm]);
+	    cond_check(&as->cpsr, as->regs[rn], as->regs[rm]);
 	    break;
 
     }
@@ -332,26 +344,30 @@ int main(int argc, char **argv)
     unsigned int r;
     
     /* Emulate add_a */
-    arm_state_init(&state, (unsigned int *) add_a, 1, 2, 0, 0);
-    arm_state_print(&state);
-    r = armemu(&state);
+    arm_state_init(&as, (unsigned int *) add_a, 5, 3, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
     printf("armemu(add_a(1,2)) = %d\n", r);
 
-    arm_state_init(&state, (unsigned int *) sub_a, 2, 1, 0, 0);
-    arm_state_print(&state);
-    r = armemu(&state);
-    printf("armemu(sub_a(1,2)) = %d\n", r);
+    arm_state_init(&as, (unsigned int *) sub_a, 5, 3, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(sub_a(2,1)) = %d\n", r);
 
-    arm_state_init(&state, (unsigned int *) mul_a, 2, 1, 0, 0);
-    arm_state_print(&state);
-    r = armemu(&state);
-    printf("armemu(mul_a(1,2)) = %d\n", r);
+    arm_state_init(&as, (unsigned int *) mul_a, 5, 3, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(mul_a(2,1)) = %d\n", r);
 
-    arm_state_init(&state, (unsigned int *) mov_a, 2, 1, 0, 0);
-    arm_state_print(&state);
-    r = armemu(&state);
-    printf("armemu(mov_a(1,2)) = %d\n", r);
+    arm_state_init(&as, (unsigned int *) mov_a, 5, 3, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(mov_a(2,1)) = %d\n", r);
 
+    arm_state_init(&as, (unsigned int *) cmp_a, 5, 3, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmp_a(2,1)) = %d\n", r);
 
 
     return 0;
