@@ -13,8 +13,9 @@ int add_a(int a, int b);
 int sub_a(int a, int b);
 int mul_a(int a, int b);
 int cmp_a(int a, int b);
-int beq_a(int a, int b);
-int bne_a(int a, int b);
+int cmpb_a(int a, int b);
+/*int beq_a(int a, int b);
+int bne_a(int a, int b);*/
 
 /* The complete cpsr */
 struct cpsr_state {
@@ -247,20 +248,47 @@ bool is_b_inst(unsigned int iw)
 
 }
 
+/*bool branch_condition(unsigned int cond)
+{
+    int branch;
+    switch(cond)
+	case 0b0000: // EQ
+	    if
+	case 0b0001: // NE
+	case 0b1011: // LT
+	case 0b1100: // GT
+	case 0b1010: // GE
+	case 0b1101: // LE
+
+    return branch;
+
+}*/
+
 void armemu_b(struct arm_state *as)
 {
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int cond = (iw >> 28) & 0b1111;
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
+    unsigned int sign;
 
+    sign = (iw >> 23) & 0b1;
+
+    if(sign) 
+    {
+        offset = (iw | 0xFF000000);
+	offset = ((~offset) +1) * -1;
+
+    } else {
+        offset = (iw & 0xFFFFFF);
+    }
+    
     /* Shift bit left to truncate left bits*/
-    offset = (iw << 8);
 
     /* Shift right to preserve MSB */
-    offset = (iw >> 8);
 
     
+
     printf("OFFSET: %u", offset);
 
     if(bl_bit)
@@ -269,7 +297,7 @@ void armemu_b(struct arm_state *as)
     }
 
     /* Change the PC to the new address now */
-    unsigned int new_address = offset + 8;
+    unsigned int new_address = (offset*4) + 8;
     as->regs[PC] += new_address;
 
 
@@ -321,7 +349,6 @@ void armemu_data_processing(struct arm_state *as)
             break;
         case 0b1010: //cmp
             cmp(&as->cpsr, as->regs[rn], as->regs[rm]);
-	    cond_check(&as->cpsr, as->regs[rn], as->regs[rm]);
 	    break;
 
     }
@@ -355,6 +382,8 @@ void armemu_one(struct arm_state *as)
     } else if (is_data_processing_inst(iw)) {
     	armemu_data_processing(as);
     } else if (is_b_inst(iw)) {
+
+	/* If branch condition, then branch*/
         armemu_b(as);
     }
 }
@@ -400,6 +429,12 @@ int main(int argc, char **argv)
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(cmp_a(2,1)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpb_a, 1, 1, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpb_a(2,1)) = %d\n", r);
+
 
     
     
