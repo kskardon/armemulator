@@ -13,6 +13,8 @@ int add_a(int a, int b);
 int sub_a(int a, int b);
 int mul_a(int a, int b);
 int cmp_a(int a, int b);
+int beq_a(int a, int b);
+int bne_a(int a, int b);
 
 /* The complete cpsr */
 struct cpsr_state {
@@ -235,6 +237,44 @@ int cond_check(struct cpsr_state *cpsr, int a, int b)
     return 0;
 }
 
+bool is_b_inst(unsigned int iw)
+{
+    unsigned int b_code;
+    
+    b_code = (iw >> 25) & 0b111;
+
+    return (b_code == 0b101);
+
+}
+
+void armemu_b(struct arm_state *as)
+{
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int cond = (iw >> 28) & 0b1111;
+    unsigned int offset;
+    unsigned int bl_bit = (iw >> 24) & 0b1;
+
+    /* Shift bit left to truncate left bits*/
+    offset = (iw << 8);
+
+    /* Shift right to preserve MSB */
+    offset = (iw >> 8);
+
+    
+    printf("OFFSET: %u", offset);
+
+    if(bl_bit)
+    {
+        as->regs[LR] = as->regs[PC]+4;
+    }
+
+    /* Change the PC to the new address now */
+    unsigned int new_address = offset + 8;
+    as->regs[PC] += new_address;
+
+
+}
+
 
 bool is_data_processing_inst(unsigned int iw)
 {
@@ -250,9 +290,9 @@ void armemu_data_processing(struct arm_state *as)
     /* Op1 is a/rn and Op2 is b/rm */
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int cond = (iw >> 28) & 0b1111;
-    unsigned int i_bit = (iw >> 25) & 0b1;
+    unsigned int imm_bit = (iw >> 25) & 0b1;
     unsigned int opcode = (iw >> 21) & 0b1111;
-    unsigned int s_bit = (iw >> 20) & 0b1;
+    unsigned int set_bit = (iw >> 20) & 0b1;
     unsigned int rn = (iw >> 16) & 0b1111;
     unsigned int rd = (iw >> 12) & 0b1111;
     unsigned int rm, imm;
@@ -260,24 +300,14 @@ void armemu_data_processing(struct arm_state *as)
     int cs, bs, result;
     long long cl, bl;
 
-    printf("WORD: %u\n", iw);
-    printf("COND: %u\n", cond);
-    printf("i_bit: %u\n", i_bit);
-    printf("opcode: %u\n", opcode);
-    printf("s_bit: %u\n", s_bit);
-    printf("Rd: %u\n", rd);
-
 	    
     
     /* Setting RM with either immediate value or RM */
-    if(!i_bit) {
+    if(!imm_bit) {
         rm = iw & 0xF;
     } else {
         rm = iw & 0xFF;
     }
-    printf("Rm is %u\n", rm);
-    printf("Rn is %u\n", rn);
-
 
     switch(opcode) {
         case 0b1101: //mov
@@ -324,6 +354,8 @@ void armemu_one(struct arm_state *as)
         armemu_mul(as);
     } else if (is_data_processing_inst(iw)) {
     	armemu_data_processing(as);
+    } else if (is_b_inst(iw)) {
+        armemu_b(as);
     }
 }
 
@@ -368,6 +400,9 @@ int main(int argc, char **argv)
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(cmp_a(2,1)) = %d\n", r);
+
+    
+    
 
 
     return 0;
