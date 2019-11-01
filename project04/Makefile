@@ -1,9 +1,12 @@
-PROGS = find_max_a
-OBJS_ARMEMU = find_max_a.o
+PROGS = find_max_a fib_rec_a
+OBJS_ARMEMU = find_max_a.o fib_rec_a.o
 
 all : ${PROGS}
 find_max_a : find_max_a.s
 	as -o find_max_a.o find_max_a.s
+
+fib_rec_a : fib_rec_a.s
+	as -o fib_rec_a.o fib_rec_a.s
 
 armemu_combined : armemu_combined.c ${OBJS_ARMEMU}
 	gcc -o armemu_combined armemu_combined.c ${OBJS_ARMEMU}

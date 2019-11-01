@@ -22,6 +22,7 @@ int ldrb_a(int a, int b);
 int str_a(int a, int b);
 int strb_a(int a, int b);*/
 int find_max_a(int *array, int len);
+int fib_rec_a(int n);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -450,18 +451,6 @@ void armemu_sdt(struct arm_state *as)
         target_address = rn + rm_offset;
     }
 
-    printf("Positive: %u\t",updown);
-    printf("Immediate: %u\t", !immediate);
-    printf("Rd: %u\t", rd);
-    printf("Rm: %u\t", rm_offset);
-    printf("Byte: %u\t", byteword);
-    printf("Load: %u\t", rd);
-    printf("Rn: %u\t", rn);
-    printf("Target address: %u\n", target_address);
-
-
-
-
     
     /* If loading from memory */
     if(loadstore) { 
@@ -490,7 +479,6 @@ void armemu_sdt(struct arm_state *as)
             /* Store word */
 
             *((unsigned int *)target_address) = as->regs[rd]; 
-
 
 	}
     }
@@ -561,6 +549,12 @@ int main(int argc, char **argv)
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(find_max(1,2)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) fib_rec_a, (unsigned int) 7, 0, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(fib_rec(7)) = %d\n", r);
+
 
 
 
