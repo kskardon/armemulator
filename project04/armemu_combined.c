@@ -14,6 +14,8 @@ int sub_a(int a, int b);
 int mul_a(int a, int b);
 int cmp_a(int a, int b);
 int cmpb_a(int a, int b);
+int cmpbne_a(int a, int b);
+int cmpbeq_a(int a, int b);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -248,26 +250,57 @@ bool is_b_inst(unsigned int iw)
 
 }
 
-/*bool branch_condition(unsigned int cond)
-{
-    int branch;
-    switch(cond)
-	case 0b0000: // EQ
-	    if
-	case 0b0001: // NE
-	case 0b1011: // LT
-	case 0b1100: // GT
-	case 0b1010: // GE
-	case 0b1101: // LE
-
-    return branch;
-
-}*/
-
-void armemu_b(struct arm_state *as)
+int branch_condition(struct arm_state *as)
 {
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int cond = (iw >> 28) & 0b1111;
+   
+    int branch = 0;
+    switch(cond) {
+	case 0b0000: // EQ
+	//If the cases are equal, z is 1
+	    if(as->cpsr.Z)
+	    {
+	        printf("NUMBERS ARE EQUAL");
+	        branch = 1;
+	    } else if(!as->cpsr.Z) {
+                printf("NUMBERS ARE NOT EQUAL");
+		branch = 0;
+	    }
+	    break;
+	case 0b0001: // NE
+	//The the cases are not equal, the 
+	//i
+	    if(as->cpsr.Z) 
+	    {
+		printf("NUMBERS ARE EQUAL");
+	        branch =  1;
+	    } else if(!as->cpsr.Z) {
+                printf("NUMBERS ARE NOT  EQUAL");
+		branch = 0;
+	    }
+	    break;
+	case 0b1011: // LT
+	    break;
+	case 0b1100: // GT
+	    break;
+	case 0b1010: // GE
+	    break;
+	case 0b1101: // LE
+	    break;
+	case 0b1110:
+	    branch = 1;
+	    break;
+    }
+    return branch;
+
+}
+
+void armemu_b(struct arm_state *as)
+{
+
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    printf("WORD: %u\n", iw);
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
     unsigned int sign;
@@ -355,7 +388,7 @@ void armemu_data_processing(struct arm_state *as)
         
     if (rd != PC)
     {
-        as->regs[PC] = as->regs[PC] + 4;
+        as->regs[PC] += 4;
     }
 }
 
@@ -382,9 +415,12 @@ void armemu_one(struct arm_state *as)
     } else if (is_data_processing_inst(iw)) {
     	armemu_data_processing(as);
     } else if (is_b_inst(iw)) {
-
+        if(branch_condition(as)) {
 	/* If branch condition, then branch*/
-        armemu_b(as);
+            armemu_b(as);
+	} else {
+            as->regs[PC] += 4;
+	}
     }
 }
 
@@ -430,10 +466,21 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmp_a(2,1)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) cmpb_a, 1, 1, 0, 0);
+    arm_state_init(&as, (unsigned int *) cmpb_a, 5, 7, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(cmpb_a(2,1)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpbne_a, 5, 7, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpbne_a(5,7)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpbeq_a, 5, 7, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpbeq_a(5,7)) = %d\n", r);
+
 
 
     
