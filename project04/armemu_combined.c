@@ -454,7 +454,9 @@ void armemu_sdt(struct arm_state *as)
            /* as->regs[rd] = */
 	} else if (!byteword) {
 	    /* Get the value from the stack */
-            as->regs[rd] = as->stack[target_address];
+            
+	    printf("Loading address %u in register  %u", target_address, rd);
+	    as->regs[rd] = as->stack[target_address];
 	}
 
 
@@ -466,6 +468,8 @@ void armemu_sdt(struct arm_state *as)
 
 	} else if (!byteword) {
             /* Store word */
+
+	    printf("Storing register %u in address %u", rd, target_address);
             as->stack[target_address] = as->regs[rd]; 
 	}
     }
@@ -598,6 +602,10 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
+    arm_state_init(&as, (unsigned int *) str_a, 4, 5, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
     
     

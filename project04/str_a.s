@@ -2,5 +2,7 @@
 .func str_a
 
 str_a:
-    str r0, [sp, #4]
+    sub sp, sp, #16
+    str r1, [sp, #4]
+    ldr r0, [sp, #4]
     bx lr
