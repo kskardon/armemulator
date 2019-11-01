@@ -365,23 +365,23 @@ void armemu_data_processing(struct arm_state *as)
     
     /* Setting RM with either immediate value or RM */
     if(!imm_bit) {
-        rm = iw & 0xF;
+        rm = as->regs[iw & 0xF];
     } else {
         rm = iw & 0xFF;
     }
 
     switch(opcode) {
         case 0b1101: //mov
-            as->regs[rd] = as->regs[rm];
+            as->regs[rd] = rm;
             break;
         case 0b0100: //add
-            as->regs[rd] = as->regs[rn] + as->regs[rm];
+            as->regs[rd] = as->regs[rn] + rm;
             break;
         case 0b0010: //sub
-            as->regs[rd] = as->regs[rn] - as->regs[rm];
+            as->regs[rd] = as->regs[rn] - rm;
             break;
         case 0b1010: //cmp
-            cmp(&as->cpsr, as->regs[rn], as->regs[rm]);
+            cmp(&as->cpsr, as->regs[rn], rm);
 	    break;
 
     }
@@ -449,12 +449,12 @@ int main(int argc, char **argv)
     arm_state_init(&as, (unsigned int *) sub_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(sub_a(2,1)) = %d\n", r);
+    printf("armemu(sub_a(1,1)) = %d\n", r);
 
     arm_state_init(&as, (unsigned int *) mul_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(mul_a(2,1)) = %d\n", r);
+    printf("armemu(mul_a(1,1)) = %d\n", r);
 
     arm_state_init(&as, (unsigned int *) mov_a, 5, 3, 0, 0);
     arm_state_print(&as);

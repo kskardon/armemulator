@@ -2,5 +2,5 @@
 .func mov_a
 
 mov_a:
-    mov r0, r1
+    mov r0, #8
     bx lr

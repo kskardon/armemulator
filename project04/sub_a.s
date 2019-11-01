@@ -2,5 +2,5 @@
 .func sub_a
 
 sub_a:
-    sub r0, r0, r1
+    sub r0, r0, #5
     bx lr
