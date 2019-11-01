@@ -19,6 +19,7 @@ int cmpbeq_a(int a, int b);
 int cmpblt_a(int a, int b);
 int ldr_a(int a, int b);
 int str_a(int a, int b);
+int strb_a(int a, int b);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -424,38 +425,41 @@ void armemu_sdt(struct arm_state *as)
 	/* Sets immediate offset */
         rm_offset = iw & 0xFFF;
 
-        /* If immediate value is negative */
-       	if(updown == 0) {
-	    /* Perform two's complement */
-            rm_offset = ((~rm_offset) +1) * -1;
-
-	    /* Subtract offset from rn to get target address */
-	    target_address = rn - rm_offset;
-	} else {
-	    /* If immediate value is positive, add value to rn */
-	    target_address = rn + rm_offset;
-	}
-    /* If the given value is register instead of an immediate */
+           /* If the given value is register instead of an immediate */
     } else if(immediate) {
 
 	/* Returns offset value stored within Rm register */
         rm_offset = as->regs[iw & 0xF];
 
-	/* Add new offset to register for target address */
-	target_address = rn + rm_offset;
        
     }
+
+    /* If immediate value is negative */
+    if(updown == 0) {
+        /* Perform two's complement */
+        rm_offset = ((~rm_offset) +1) * -1;
+
+        /* Subtract offset from rn to get target address */
+        target_address = rn - rm_offset;
+    } else {
+    /* If immediate value is positive, add value to rn */
+        target_address = rn + rm_offset;
+    }
+
     
     /* If loading from memory */
     if(loadstore) { 
        
 	/* If it is a byte */
 	if (byteword) {
+	    as->regs[rd] =  as->stack[target_address];
+            printf("Loading address %u in register  %u\n", target_address, rd);
+
            /* as->regs[rd] = */
 	} else if (!byteword) {
 	    /* Get the value from the stack */
             
-	    printf("Loading address %u in register  %u", target_address, rd);
+	    printf("Loading address %u in register  %u\n", target_address, rd);
 	    as->regs[rd] = as->stack[target_address];
 	}
 
@@ -465,16 +469,20 @@ void armemu_sdt(struct arm_state *as)
         /* Store from memory */
 	if(byteword) {
 	    /* Store byte */ 
+	                printf("Storing register %u aka value %u in address %u\n", rd, as->regs[rd], target_address);
+			as->stack[target_address] = (as->regs[rd] & 0x000000FF);
+			printf("Value was stored as %u", as->stack[target_address]);
 
 	} else if (!byteword) {
             /* Store word */
 
-	    printf("Storing register %u in address %u", rd, target_address);
+	    printf("Storing register %u in address %u\n", rd, target_address);
             as->stack[target_address] = as->regs[rd]; 
 	}
     }
 
-    printf("Stack value: %u", as->stack[target_address]);
+    printf("Stack value: %u\t", as->stack[target_address]);
+    printf("Register number and value: %u & %u\n", rd, as->regs[rd]);
     as->regs[PC] += 4;
 }
 
@@ -602,12 +610,16 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) str_a, 4, 5, 0, 0);
+    arm_state_init(&as, (unsigned int *) str_a, 8, 5, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
-    
+    arm_state_init(&as, (unsigned int *) strb_a, 8, 'ix', 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpblt_a(8, 12)) = %d\n", r);
+ 
     
 
 

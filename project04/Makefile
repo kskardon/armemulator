@@ -1,9 +1,12 @@
-PROGS = mov_a add_a mul_a sub_a cmp_a cmpb_a cmpbne_a cmpbeq_a cmpblt_a ldr_a str_a
+PROGS = mov_a add_a mul_a sub_a cmp_a cmpb_a cmpbne_a cmpbeq_a cmpblt_a ldr_a str_a strb_a
 
-OBJS_ARMEMU = mov_a.o add_a.o mul_a.o sub_a.o cmp_a.o cmpb_a.o cmpbne_a.o cmpbeq_a.o cmpblt_a.o ldr_a.o str_a.o
+OBJS_ARMEMU = mov_a.o add_a.o mul_a.o sub_a.o cmp_a.o cmpb_a.o cmpbne_a.o cmpbeq_a.o cmpblt_a.o ldr_a.o str_a.o strb_a.o
 
 
 all : ${PROGS}
+
+strb_a : strb_a.s
+	as -o strb_a.o strb_a.s
 
 ldr_a : ldr_a.s
 	as -o ldr_a.o ldr_a.s

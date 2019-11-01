@@ -3,6 +3,6 @@
 
 str_a:
     sub sp, sp, #16
-    str r1, [sp, #4]
-    ldr r0, [sp, #4]
+    str r1, [sp, r0]
+    ldr r0, [sp, #8]
     bx lr
