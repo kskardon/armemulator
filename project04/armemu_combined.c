@@ -16,6 +16,7 @@ int cmp_a(int a, int b);
 int cmpb_a(int a, int b);
 int cmpbne_a(int a, int b);
 int cmpbeq_a(int a, int b);
+int cmpblt_a(int a, int b);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -258,35 +259,34 @@ int branch_condition(struct arm_state *as)
     int branch = 0;
     switch(cond) {
 	case 0b0000: // EQ
-	//If the cases are equal, z is 1
-	    if(as->cpsr.Z)
-	    {
-	        printf("NUMBERS ARE EQUAL");
+	    if(as->cpsr.Z) {
 	        branch = 1;
-	    } else if(!as->cpsr.Z) {
-                printf("NUMBERS ARE NOT EQUAL");
-		branch = 0;
 	    }
 	    break;
 	case 0b0001: // NE
-	//The the cases are not equal, the 
-	//i
-	    if(as->cpsr.Z) 
-	    {
-		printf("NUMBERS ARE EQUAL");
-	        branch =  1;
-	    } else if(!as->cpsr.Z) {
-                printf("NUMBERS ARE NOT  EQUAL");
-		branch = 0;
-	    }
+	    if(!as->cpsr.Z) {
+	        branch = 1;
+	    } 
 	    break;
 	case 0b1011: // LT
+	    if(as->cpsr.N != as->cpsr.V) {
+		branch = 1;
+	    }
 	    break;
 	case 0b1100: // GT
+            if((as->cpsr.N == as->cpsr.V) && !as->cpsr.Z) {
+                branch = 1;
+	    }
 	    break;
 	case 0b1010: // GE
+            if(as->cpsr.N == as->cpsr.V) {
+                branch = 1;
+	    }
 	    break;
 	case 0b1101: // LE
+	    if((as->cpsr.N != as->cpsr.V) || as->cpsr.Z) {
+                branch = 1;
+	    }
 	    break;
 	case 0b1110:
 	    branch = 1;
@@ -441,17 +441,17 @@ int main(int argc, char **argv)
     unsigned int r;
     
     /* Emulate add_a */
-    arm_state_init(&as, (unsigned int *) add_a, 5, 3, 0, 0);
+    arm_state_init(&as, (unsigned int *) add_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(add_a(1,2)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) sub_a, 5, 3, 0, 0);
+    arm_state_init(&as, (unsigned int *) sub_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(sub_a(2,1)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) mul_a, 5, 3, 0, 0);
+    arm_state_init(&as, (unsigned int *) mul_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(mul_a(2,1)) = %d\n", r);
@@ -476,10 +476,31 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmpbne_a(5,7)) = %d\n", r);
 
+    arm_state_init(&as, (unsigned int *) cmpbne_a, 5, 5, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpbne_a(5,5)) = %d\n", r);
+
     arm_state_init(&as, (unsigned int *) cmpbeq_a, 5, 7, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(cmpbeq_a(5,7)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpbeq_a, 5, 5, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpbeq_a(5,5)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpblt_a, 5, 7, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpblt_a(5,7)) = %d\n", r);
+
+    arm_state_init(&as, (unsigned int *) cmpblt_a, 5, 5, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
+
 
 
 
