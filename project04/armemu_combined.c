@@ -17,6 +17,8 @@ int cmpb_a(int a, int b);
 int cmpbne_a(int a, int b);
 int cmpbeq_a(int a, int b);
 int cmpblt_a(int a, int b);
+int ldr_a(int a, int b);
+int str_a(int a, int b);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -156,7 +158,7 @@ void armemu_mul(struct arm_state *as)
    
     if (rd != PC)
     {
-        as->regs[PC] = as->regs[PC] + 4;
+        as->regs[PC] += 4;
     }
 }
 
@@ -351,12 +353,12 @@ void armemu_data_processing(struct arm_state *as)
     /* Op1 is a/rn and Op2 is b/rm */
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int cond = (iw >> 28) & 0b1111;
-    unsigned int imm_bit = (iw >> 25) & 0b1;
+    unsigned int imm = (iw >> 25) & 0b1;
     unsigned int opcode = (iw >> 21) & 0b1111;
     unsigned int set_bit = (iw >> 20) & 0b1;
     unsigned int rn = (iw >> 16) & 0b1111;
     unsigned int rd = (iw >> 12) & 0b1111;
-    unsigned int rm, imm;
+    unsigned int rm;
     /* Values for CMP */
     int cs, bs, result;
     long long cl, bl;
@@ -364,7 +366,7 @@ void armemu_data_processing(struct arm_state *as)
 	    
     
     /* Setting RM with either immediate value or RM */
-    if(!imm_bit) {
+    if(!imm) {
         rm = as->regs[iw & 0xF];
     } else {
         rm = iw & 0xFF;
@@ -392,6 +394,87 @@ void armemu_data_processing(struct arm_state *as)
     }
 }
 
+bool is_sdt_inst(unsigned int iw) 
+{
+    unsigned int sdt_code;
+
+    sdt_code = (iw >> 26) & 0b11;
+
+    return (sdt_code == 0b01);
+
+}
+
+void armemu_sdt(struct arm_state *as)
+{
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int cond = (iw >> 28) & 0b1111;
+    unsigned int immediate = (iw >> 25) & 0b1;
+    unsigned int updown = (iw >> 23) & 0b1;
+    unsigned int byteword = (iw >> 22) & 0b1;
+    unsigned int loadstore = (iw >> 20) & 0b1;
+    unsigned int rn = (iw >> 16) & 0xF;
+    unsigned int rd = (iw >> 12) & 0xF;
+    unsigned int imm = iw & 0xF;
+    unsigned int rm_offset; 
+    unsigned int target_address;
+    
+    /* Check if the rm is rm or immediate value */
+    if(!immediate) {
+
+	/* Sets immediate offset */
+        rm_offset = iw & 0xFFF;
+
+        /* If immediate value is negative */
+       	if(updown == 0) {
+	    /* Perform two's complement */
+            rm_offset = ((~rm_offset) +1) * -1;
+
+	    /* Subtract offset from rn to get target address */
+	    target_address = rn - rm_offset;
+	} else {
+	    /* If immediate value is positive, add value to rn */
+	    target_address = rn + rm_offset;
+	}
+    /* If the given value is register instead of an immediate */
+    } else if(immediate) {
+
+	/* Returns offset value stored within Rm register */
+        rm_offset = as->regs[iw & 0xF];
+
+	/* Add new offset to register for target address */
+	target_address = rn + rm_offset;
+       
+    }
+    
+    /* If loading from memory */
+    if(loadstore) { 
+       
+	/* If it is a byte */
+	if (byteword) {
+           /* as->regs[rd] = */
+	} else if (!byteword) {
+	    /* Get the value from the stack */
+            as->regs[rd] = as->stack[target_address];
+	}
+
+
+    /* If storing to memory */
+    } else if(!loadstore) {
+        /* Store from memory */
+	if(byteword) {
+	    /* Store byte */ 
+
+	} else if (!byteword) {
+            /* Store word */
+            as->stack[target_address] = as->regs[rd]; 
+	}
+    }
+
+    printf("Stack value: %u", as->stack[target_address]);
+    as->regs[PC] += 4;
+}
+
+
 void armemu_one(struct arm_state *as)
 {   
     unsigned int iw;
@@ -409,18 +492,27 @@ void armemu_one(struct arm_state *as)
  
 
     if (is_bx_inst(iw)) {
+	as->branch_count++;
         armemu_bx(as);
     } else if (is_mul_inst(iw)) {
+	as->data_processing_count++;
         armemu_mul(as);
     } else if (is_data_processing_inst(iw)) {
+	as->data_processing_count++;
     	armemu_data_processing(as);
     } else if (is_b_inst(iw)) {
         if(branch_condition(as)) {
-	/* If branch condition, then branch*/
+	    as->branches_taken++;
+	    as->branch_count++;
             armemu_b(as);
 	} else {
             as->regs[PC] += 4;
+	    as->branches_not_taken++;
+	    as->branch_count++;
 	}
+    } else if (is_sdt_inst(iw)) {
+	as->memory_count++;
+        armemu_sdt(as);
     }
 }
 
@@ -501,7 +593,10 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
-
+    arm_state_init(&as, (unsigned int *) ldr_a, 5, 5, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
 
     
