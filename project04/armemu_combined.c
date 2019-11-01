@@ -8,7 +8,7 @@
 #define PC 15
 
 /* Assembly functions to emulate */
-int mov_a(int a, int b);
+/*int mov_a(int a, int b);
 int add_a(int a, int b);
 int sub_a(int a, int b);
 int mul_a(int a, int b);
@@ -18,8 +18,10 @@ int cmpbne_a(int a, int b);
 int cmpbeq_a(int a, int b);
 int cmpblt_a(int a, int b);
 int ldr_a(int a, int b);
+int ldrb_a(int a, int b);
 int str_a(int a, int b);
-int strb_a(int a, int b);
+int strb_a(int a, int b);*/
+int find_max_a(int *array, int len);
 /*int beq_a(int a, int b);
 int bne_a(int a, int b);*/
 
@@ -413,12 +415,14 @@ void armemu_sdt(struct arm_state *as)
     unsigned int updown = (iw >> 23) & 0b1;
     unsigned int byteword = (iw >> 22) & 0b1;
     unsigned int loadstore = (iw >> 20) & 0b1;
-    unsigned int rn = (iw >> 16) & 0xF;
+    unsigned int rn = as->regs[(iw >> 16) & 0xF];
     unsigned int rd = (iw >> 12) & 0xF;
     unsigned int imm = iw & 0xF;
     unsigned int rm_offset; 
     unsigned int target_address;
     
+    
+        
     /* Check if the rm is rm or immediate value */
     if(!immediate) {
 
@@ -446,43 +450,50 @@ void armemu_sdt(struct arm_state *as)
         target_address = rn + rm_offset;
     }
 
+    printf("Positive: %u\t",updown);
+    printf("Immediate: %u\t", !immediate);
+    printf("Rd: %u\t", rd);
+    printf("Rm: %u\t", rm_offset);
+    printf("Byte: %u\t", byteword);
+    printf("Load: %u\t", rd);
+    printf("Rn: %u\t", rn);
+    printf("Target address: %u\n", target_address);
+
+
+
+
     
     /* If loading from memory */
     if(loadstore) { 
        
 	/* If it is a byte */
 	if (byteword) {
-	    as->regs[rd] =  as->stack[target_address];
-            printf("Loading address %u in register  %u\n", target_address, rd);
+	    as->regs[rd] =  *((unsigned char *) target_address);
 
            /* as->regs[rd] = */
 	} else if (!byteword) {
 	    /* Get the value from the stack */
             
-	    printf("Loading address %u in register  %u\n", target_address, rd);
-	    as->regs[rd] = as->stack[target_address];
+	    as->regs[rd] = *((unsigned int *)target_address);
 	}
 
 
     /* If storing to memory */
     } else if(!loadstore) {
         /* Store from memory */
-	if(byteword) {
+	if(byteword == 1) {
 	    /* Store byte */ 
-	                printf("Storing register %u aka value %u in address %u\n", rd, as->regs[rd], target_address);
-			as->stack[target_address] = (as->regs[rd] & 0x000000FF);
-			printf("Value was stored as %u", as->stack[target_address]);
+	    *((unsigned char *)target_address) = as->regs[rd];
+            
 
-	} else if (!byteword) {
+	} else if (byteword == 0) {
             /* Store word */
 
-	    printf("Storing register %u in address %u\n", rd, target_address);
-            as->stack[target_address] = as->regs[rd]; 
+            *((unsigned int *)target_address) = as->regs[rd]; 
+
+
 	}
     }
-
-    printf("Stack value: %u\t", as->stack[target_address]);
-    printf("Register number and value: %u & %u\n", rd, as->regs[rd]);
     as->regs[PC] += 4;
 }
 
@@ -544,13 +555,17 @@ int main(int argc, char **argv)
     struct arm_state as;
     unsigned int r;
     
-    /* Emulate add_a */
-    arm_state_init(&as, (unsigned int *) add_a, 1, 3, 0, 0);
+    int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
+
+    arm_state_init(&as, (unsigned int *) find_max_a, (unsigned int) arr1,  5, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(add_a(1,2)) = %d\n", r);
+    printf("armemu(find_max(1,2)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) sub_a, 1, 3, 0, 0);
+
+
+    /* Emulate add_a */
+   /*     arm_state_init(&as, (unsigned int *) sub_a, 1, 3, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(sub_a(1,1)) = %d\n", r);
@@ -605,21 +620,28 @@ int main(int argc, char **argv)
     r = armemu(&as);
     printf("armemu(cmpblt_a(5,5)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) ldr_a, 5, 5, 0, 0);
+    int arr[2] = {1,2};
+    arm_state_init(&as, (unsigned int *) ldr_a, 5, arr, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
+    printf("armemu(ldr_a(5,5)) = %d\n", r);
 
     arm_state_init(&as, (unsigned int *) str_a, 8, 5, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
+    printf("armemu(str_a(5,5)) = %d\n", r);
 
-    arm_state_init(&as, (unsigned int *) strb_a, 8, 'ix', 0, 0);
+    char test_string[] = 'iw';
+    arm_state_init(&as, (unsigned int *) strb_a, 8, test_string, 0, 0);
     arm_state_print(&as);
     r = armemu(&as);
-    printf("armemu(cmpblt_a(8, 12)) = %d\n", r);
- 
+    printf("armemu(strb_a(8, 12)) = %d\n", r);
+   
+    arm_state_init(&as, (unsigned int *) ldrb_a, 27, test_string, 0, 0);
+    arm_state_print(&as);
+    r = armemu(&as);
+    printf("armemu(ldrb_a(8, 12)) = %d\n", r);*/
+
     
 
 
