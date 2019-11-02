@@ -558,13 +558,16 @@ int main(int argc, char **argv)
 
     int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
     /* QUADRATIC */
-    r = quadratic_c(-2,2,-3,4);
-    printf("quadratic_c(-2,2,-3,4) = %d\n", r);
-    r = quadratic_a(-2,2,-3,4);
-    printf("quadratic_a(-2,2,-3,4) = %d\n", r);
-    arm_state_init(&as, (unsigned int *) quadratic_a, -2, 2, -3, 4);
-    r = armemu(&as);
-    printf("quadtratic_a[emu](-2,2,-3,4) = %d\n", r);
+    printf("QUADRATIC");
+    printf("\tquadratic_c(-2,2,-3,4) = %d\n", quadratic_c(-2,2,-3,4));
+    printf("\tquadratic_a(-2,2,-3,4) = %d\n", quadratic_a(-2,2,-3,4));
+    arm_state_init(&as, (unsigned int *) quadratic_a, -2,2,-3,4);
+    printf("\tquadratic_a[emu](-2,2,-3,4) = %d\n", armemu(&as));
+    printf("quadratic_c(20,16,10,4) = %d\n", quadratic_c(20,16,10,4));
+    printf("quadratic_a(20,16,10,4) = %d\n", quadratic_a(20,16,10,4));
+    arm_state_init(&as, (unsigned int *) quadratic_a, 20,16,10,4);
+
+
 
 
 
