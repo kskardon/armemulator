@@ -523,14 +523,14 @@ int print_array(int *array, int len)
 {
     int i;
 
-    printf("\t{");
+    printf("{");
     for (i = 0; i < len; i++) {
         printf("%d", array[i]);
         if (i < (len - 1)) {
             printf(",");
         }
     }
-    printf("}\n\n");
+    printf("}\n");
 }
 
 void find_max_emulator(struct arm_state *as)
@@ -551,54 +551,41 @@ void find_max_emulator(struct arm_state *as)
     }
     arr3[2] = 88;
 
-    printf("FIND_MAX Positive Cases\n----------------------\n");
+    printf("FIND_MAX Positive Cases\n");
+    print_array(arr1, 5);
     r = find_max_c(arr1, 5);
-    printf("\tfind_max_c({1,0,22,0,3}, 5) = \t%d\n",r);
-    print_array(arr1, 5);
+    printf("\tfind_max_c({1,0,22,0,3}, 5) = \t\t\t%d\n",r);
     r = find_max_a(arr1, 5);
-    printf("\tfind_max_a({1,0,22,0,3}, 5) = \t%d\n",r);
-    print_array(arr1, 5);
+    printf("\tfind_max_a({1,0,22,0,3}, 5) = \t\t\t%d\n",r);
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr1, 5, 0, 0);
-    printf("\tquadratic_a[emu]({1,0,22,0,3}, 5) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({1,0,22,0,3}, 5) = \t\t%d\n", armemu(as));
 
-
-    printf("FIND_MAX 1000 Length Array\n----------------------\n");
+    printf("FIND_MAX 1000 Length Array\n");
+    print_array(arr3, 20);
     r = find_max_c(arr3, 1000);
-    printf("\tfind_max_c({-2,3,88,...,3}, 1000) = \t%d\n",r);
-    print_array(arr3, 25);
-
+    printf("\tfind_max_c({-2,3,88,...,3}, 1000) = \t\t%d\n",r);
     r = find_max_a(arr3, 1000);
-    printf("\tfind_max_a({-2,3,88,...,3}, 1000) = \t%d\n",r);
-    print_array(arr3, 25);
-
+    printf("\tfind_max_a({-2,3,88,...,3}, 1000) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr3, 25, 0, 0);
     printf("\tquadratic_a[emu]({-2,3,88,...,3}, 1000) = \t%d\n", armemu(as));
 
-
-    printf("FIND_MAX Negative Cases\n----------------------\n");
+    printf("FIND_MAX Negative Cases\n");
+    print_array(arr2, 4);
     r = find_max_c(arr2, 4);
-    printf("\tfind_max_c({-1,-2,-3,-4}, 4) = \t%d\n",r);
-    print_array(arr2, 4);
-
+    printf("\tfind_max_c({-1,-2,-3,-4}, 4) = \t\t\t%d\n",r);
     r = find_max_a(arr2, 4);
-    printf("\tfind_max_a({-1,-2,-3,-4}, 4) = \t%d\n",r);
-    print_array(arr2, 4);
-
+    printf("\tfind_max_a({-1,-2,-3,-4}, 4) = \t\t\t%d\n",r);
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr2, 4, 0, 0);
-    printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t\t%d\n", armemu(as));
     
-    
-    printf("FIND_MAX Zero Cases\n----------------------\n");
+    printf("FIND_MAX Zero Cases\n");
+    print_array(arr4, 6);
     r = find_max_c(arr4, 6);
-    printf("\tfind_max_c({0,0,0,0,1,2}, 6) = \t%d\n",r);
-    print_array(arr4, 6);
-
+    printf("\tfind_max_c({0,0,0,0,1,2}, 6) = \t\t\t%d\n",r);
     r = find_max_a(arr4, 6);
-    printf("\tfind_max_a({0,0,0,0,1,2}, 6) = \t%d\n",r);
-    print_array(arr4, 6);
-
+    printf("\tfind_max_a({0,0,0,0,1,2}, 6) = \t\t\t%d\n",r);
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr4, 6, 0, 0);
-    printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t\t%d\n", armemu(as));
 
 }
 
@@ -606,7 +593,7 @@ void print_sum_array(int *array, int len)
 {
     int i;
 
-    printf("\t{");
+    printf("{");
     for (i = 0; i < len; i++) {
         printf("%d", array[i]);
         if (i < (len - 1)) {
@@ -633,57 +620,44 @@ void sum_array_emulator(struct arm_state *as)
 	}
     }
 
-    printf("SUM_ARRAY");
-
     printf("SUM_ARRAY Positive Cases\n");
+    print_sum_array(arr1, 5);
     r = sum_array_c(arr1, 5);
-    printf("\tsum_array_c({1,0,2,0,3}, 5) = \t%d\n",r);
-    print_sum_array(arr1, 5);
-
+    printf("\tsum_array_c({1,0,2,0,3}, 5) = \t\t\t%d\n",r);
     r = sum_array_a(arr1, 5);
-    printf("\tsum_array_a({1,0,2,0,3}, 5) = \t%d\n",r);
-    print_sum_array(arr1, 5);
-
+    printf("\tsum_array_a({1,0,2,0,3}, 5) = \t\t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr1, 5, 0, 0);
-    printf("\tquadratic_a[emu]({1,0,2,0,3}, 5) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({1,0,2,0,3}, 5) = \t\t%d\n", armemu(as));
 
 
     printf("SUM_ARRAY 1000 Length Array\n");
+    print_sum_array(arr3, 20);
     r = sum_array_c(arr3, 1000);
-    printf("\tsum_array_c({-2,3,-2,...,3}, 1000) = \t%d\n",r);
-    print_sum_array(arr3, 25);
-
+    printf("\tsum_array_c({-2,3,-2,...,3}, 1000) = \t\t%d\n",r);
     r = sum_array_a(arr3, 1000);
-    printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = \t%d\n",r);
-    print_sum_array(arr3, 25);
-
+    printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int)arr3, 1000, 0, 0);
     printf("\tquadratic_a[emu]({-2,3,-2,...,3}, 1000) = \t%d\n", armemu(as));
 
 
     printf("SUM_ARRAY Negative Cases\n");
+    print_sum_array(arr2, 4);
     r = sum_array_c(arr2, 4);
-    printf("\tsum_array_c({-1,-2,-3,-4}, 4) = %d\n",r);
-    print_sum_array(arr2, 4);
-
+    printf("\tsum_array_c({-1,-2,-3,-4}, 4) = \t\t%d\n",r);
     r = sum_array_a(arr2, 4);
-    printf("\tsum_array_a({-1,-2,-3,-4}, 4) = %d\n",r);
-    print_sum_array(arr2, 4);
-
+    printf("\tsum_array_a({-1,-2,-3,-4}, 4) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr2, 4, 0, 0);
-    printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t\t%d\n", armemu(as));
 
 
     printf("SUM_ARRAY Zero Cases\n");
+    print_sum_array(arr4, 6);
     r = sum_array_c(arr4, 6);
-    printf("\tsum_array_c({0,0,0,0,1,2}, 6) = %d\n",r);
-    print_sum_array(arr4, 6);
-
+    printf("\tsum_array_c({0,0,0,0,1,2}, 6) = \t\t%d\n",r);
     r = sum_array_a(arr4, 6);
-    printf("\tsum_array_a({0,0,0,0,1,2}, 6) = %d\n",r);
-    print_sum_array(arr4, 6);
+    printf("\tsum_array_a({0,0,0,0,1,2}, 6) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr4, 6, 0, 0);
-    printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t%d\n", armemu(as));
+    printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t\t%d\n", armemu(as));
 
     
 }
