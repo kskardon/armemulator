@@ -705,7 +705,7 @@ void sum_array_emulator(struct arm_state *as)
     printf("\tsum_array_a({1,0,2,0,3}, 5) = \t%d\n",r);
     print_sum_array(arr1, 5);
 
-    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr1, 5, 0, 0);
+    arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr1, 5, 0, 0);
     printf("\tquadratic_a[emu]({1,0,2,0,3}, 5) = \t%d\n", armemu(as));
 
 
@@ -718,7 +718,7 @@ void sum_array_emulator(struct arm_state *as)
     printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = \t%d\n",r);
     print_sum_array(arr3, 25);
 
-    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int)arr3, 25, 0, 0);
+    arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int)arr3, 1000, 0, 0);
     printf("\tquadratic_a[emu]({-2,3,-2,...,3}, 1000) = \t%d\n", armemu(as));
 
 
@@ -731,7 +731,7 @@ void sum_array_emulator(struct arm_state *as)
     printf("\tsum_array_a({-1,-2,-3,-4}, 4) = %d\n",r);
     print_sum_array(arr2, 4);
 
-    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr2, 4, 0, 0);
+    arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr2, 4, 0, 0);
     printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t%d\n", armemu(as));
 
 
@@ -743,7 +743,7 @@ void sum_array_emulator(struct arm_state *as)
     r = sum_array_a(arr4, 6);
     printf("\tsum_array_a({0,0,0,0,1,2}, 6) = %d\n",r);
     print_sum_array(arr4, 6);
-    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr4, 6, 0, 0);
+    arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr4, 6, 0, 0);
     printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t%d\n", armemu(as));
 
     
@@ -976,38 +976,38 @@ void strlen_emulator(struct arm_state *as)
     char string2[] = "CS315 is Awesome";
     char string3[] = "!@#$#$##@";
     char string4[] = "1234567890";
-    int r;
 
+    printf("STRLEN\n");
     printf("%s\n", string);
     printf("\tstrlen_c = \t%d\n", strlen_c(string));
     printf("\tstrlen_a = \t%d\n", strlen_a(string));
     arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string,0,0,0);
     printf("\tstrlen_a[emu] = %d\n", armemu(as));
 
-
     printf("%s\n", string1);
-    r = strlen_c(string1);
-    printf("\tString length = %d\n", r);
-    r = strlen_a(string1);
-    printf("\tString length = %d\n", r);
+    printf("\tstrlen_c = \t%d\n", strlen_c(string1));
+    printf("\tstrlen_a = \t%d\n", strlen_a(string1));
+    arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string1,0,0,0);
+    printf("\tstrlen_a[emu] = %d\n", armemu(as));
 
     printf("%s\n", string2);
-    r = strlen_c(string2);
-    printf("\tString length = %d\n", r);
-    r = strlen_a(string2);
-    printf("\tString length = %d\n", r);
+    printf("\tstrlen_c = \t%d\n", strlen_c(string2));
+    printf("\tstrlen_a = \t%d\n", strlen_a(string2));
+    arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string2,0,0,0);
+    printf("\tstrlen_a[emu] = %d\n", armemu(as));
 
     printf("%s\n", string3);
-    r = strlen_c(string3);
-    printf("\tString length = %d\n", r);
-    r = strlen_a(string3);
-    printf("\tString length = %d\n", r);
+    printf("\tstrlen_c = \t%d\n", strlen_c(string3));
+    printf("\tstrlen_a = \t%d\n", strlen_a(string3));
+    arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string3,0,0,0);
+    printf("\tstrlen_a[emu] = %d\n", armemu(as));
 
     printf("%s\n", string4);
-    r = strlen_c(string4);
-    printf("\tString length = %d\n", r);
-    r = strlen_a(string4);
-    printf("\tString length = %d\n", r);
+    printf("\tstrlen_c = \t%d\n", strlen_c(string4));
+    printf("\tstrlen_a = \t%d\n", strlen_a(string4));
+    arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string4,0,0,0);
+    printf("\tstrlen_a[emu] = %d\n", armemu(as));
+
 }
 
 int main(int argc, char **argv)
