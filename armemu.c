@@ -287,12 +287,10 @@ int branch_condition(struct arm_state *as)
 	    break;
     }
     return branch;
-
 }
 
 void armemu_b(struct arm_state *as)
 {
-
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
