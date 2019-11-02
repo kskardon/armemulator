@@ -300,7 +300,6 @@ void armemu_b(struct arm_state *as)
     {
         offset = (iw | 0xFF000000);
 	offset = ((~offset) + 1) * -1;
-
     } else {
         offset = (iw & 0xFFFFFF);
     }
@@ -309,7 +308,7 @@ void armemu_b(struct arm_state *as)
     {
         as->regs[LR] = as->regs[PC] + 4;
     }
-
+    
     /* Change the PC to the new address now */
     as->regs[PC] += (offset * 4) + 8;
 }
@@ -469,7 +468,6 @@ void armemu_one(struct arm_state *as)
 unsigned int armemu(struct arm_state *as)
 {
     /* Execute instructions until PC = 0 */
-    /* This happens when bx lr is issued and lr is 0 */
     while (as->regs[PC] != 0) {
         armemu_one(as);
     }
@@ -657,7 +655,6 @@ void sum_array_emulator(struct arm_state *as)
 
 void fib_rec_emulator(struct arm_state *as) 
 {
-   
     printf("FIB_REC\n");
     printf("\tfib_rec_c(0) = \t\t%d\n", fib_rec_c(0));
     printf("\tfib_rec_a(0) = \t\t%d\n", fib_rec_a(0)); 
