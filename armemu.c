@@ -482,6 +482,8 @@ void dynamic_analysis(struct arm_state *as)
 {
     float total_inst = 0;
     total_inst = as->branch_count + as->data_processing_count + as->memory_count;
+    float taken_per = (as->branches_taken / as->branch_count) * 100;
+    float not_taken_per = (as->branches_not_taken / as->branch_count) * 100;
     float data_per = (as->data_processing_count / total_inst) * 100;
     float branch_per = (as->branch_count / total_inst) * 100;
     float mem_per = (as->memory_count / total_inst) * 100;
@@ -490,9 +492,8 @@ void dynamic_analysis(struct arm_state *as)
     printf("\t# of data processing:\t%u\t%.f%\n", (unsigned int)as->data_processing_count, data_per);
     printf("\t# of branch:\t\t%u\t%.f%\n", (unsigned int)as->branch_count, branch_per);
     printf("\t# of memory:\t\t%u\t%.f%\n", (unsigned int)as->memory_count, mem_per);
-    printf("\tbranches taken:\t\t%u\n", (unsigned int)as->branches_taken);
-    printf("\tbranches not taken:\t%u\n", (unsigned int)as->branches_not_taken);
-
+    printf("\tbranches taken:\t\t%u\t%.f%\n", (unsigned int)as->branches_taken, taken_per);
+    printf("\tbranches not taken:\t%u\t%.f%\n", (unsigned int)as->branches_not_taken, not_taken_per);
 }
 
 void quadratic_emulator(struct arm_state *as)
@@ -586,7 +587,6 @@ void find_max_emulator(struct arm_state *as)
     printf("\tfind_max_a({0,0,0,0,1,2}, 6) = \t\t\t%d\n",r);
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr4, 6, 0, 0);
     printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t\t%d\n", armemu(as));
-
 }
 
 void print_sum_array(int *array, int len)
@@ -629,7 +629,6 @@ void sum_array_emulator(struct arm_state *as)
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr1, 5, 0, 0);
     printf("\tquadratic_a[emu]({1,0,2,0,3}, 5) = \t\t%d\n", armemu(as));
 
-
     printf("SUM_ARRAY 1000 Length Array\n");
     print_sum_array(arr3, 20);
     r = sum_array_c(arr3, 1000);
@@ -638,7 +637,6 @@ void sum_array_emulator(struct arm_state *as)
     printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int)arr3, 1000, 0, 0);
     printf("\tquadratic_a[emu]({-2,3,-2,...,3}, 1000) = \t%d\n", armemu(as));
-
 
     printf("SUM_ARRAY Negative Cases\n");
     print_sum_array(arr2, 4);
@@ -649,7 +647,6 @@ void sum_array_emulator(struct arm_state *as)
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr2, 4, 0, 0);
     printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t\t%d\n", armemu(as));
 
-
     printf("SUM_ARRAY Zero Cases\n");
     print_sum_array(arr4, 6);
     r = sum_array_c(arr4, 6);
@@ -658,8 +655,6 @@ void sum_array_emulator(struct arm_state *as)
     printf("\tsum_array_a({0,0,0,0,1,2}, 6) = \t\t%d\n",r);
     arm_state_init(as, (unsigned int *) sum_array_a, (unsigned int) arr4, 6, 0, 0);
     printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t\t%d\n", armemu(as));
-
-    
 }
 
 void fib_rec_emulator(struct arm_state *as) 
