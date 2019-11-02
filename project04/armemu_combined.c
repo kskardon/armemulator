@@ -49,7 +49,6 @@ struct arm_state {
     int request_count;
     int hit_count;
     int miss_count;
-
 };
 
 /* Initialize cpsr as */
@@ -95,9 +94,9 @@ void arm_state_init(struct arm_state *as, unsigned int *func,
     as->regs[1] = arg1;
     as->regs[2] = arg2;
     as->regs[3] = arg3;
-
 }
 
+/* Initialize dynamic analysis values */
 void dynamic_analysis_init(struct arm_state *as) 
 {
     as->data_processing_count = 0;
@@ -105,7 +104,6 @@ void dynamic_analysis_init(struct arm_state *as)
     as->memory_count = 0;
     as->branches_taken = 0;
     as->branches_not_taken = 0;
-
 }
 
 void arm_state_print(struct arm_state *as)
@@ -120,51 +118,34 @@ void arm_state_print(struct arm_state *as)
 
 bool is_bx_inst(unsigned int iw)
 {
-    unsigned int bx_code;
-
-    bx_code = (iw >> 4) & 0x00FFFFFF;
+    unsigned int bx_code = (iw >> 4) & 0x00FFFFFF;
 
     return (bx_code == 0b000100101111111111110001);
 }
 
 void armemu_bx(struct arm_state *as)
 {
-    unsigned int iw;
-    unsigned int rn;
-
-    iw = *((unsigned int *) as->regs[PC]);
-    rn = iw & 0b1111;
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int rn = iw & 0b1111;
 
     as->regs[PC] = as->regs[rn];
 }
 
 bool is_mul_inst(unsigned int iw)
-{
-    //unsigned int op;
-    //unsigned int opcode;
- 
-    unsigned int op;
-    unsigned int opcode;
- 
-    op = (iw >> 22) & 0b111111; //getting the op code
-    opcode = (iw >> 4) & 0b1111; //getting bits 4 through 7
- 
+{ 
+    unsigned int op = (iw >> 22) & 0b111111; 
+    unsigned int opcode = (iw >> 4) & 0b1111;
+  
     return (op == 0b000000) && (opcode == 0b1001);
 }
 
 void armemu_mul(struct arm_state *as)
 {
-    unsigned int iw;
-    unsigned int rd, rs, rm;
- 
-    iw = *((unsigned int *) as->regs[PC]);
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+    unsigned int rd = (iw >> 16) & 0xF;
+    unsigned int rs = (iw >> 8) & 0xF;
+    unsigned int rm = iw & 0xF;
    
-    rd = (iw >> 16) & 0xF;
-   
-    rs = (iw >> 8) & 0xF;
-   
-    rm = iw & 0xF;
- 
     as->regs[rd] = as->regs[rm] * as->regs[rs];
    
     if (rd != PC)
@@ -173,7 +154,8 @@ void armemu_mul(struct arm_state *as)
     }
 }
 
-int cmp(struct cpsr_state *cpsr, unsigned int a, unsigned int b) {
+int cmp(struct cpsr_state *cpsr, unsigned int a, unsigned int b) 
+{
     int as, bs, result;
     long long al, bl;
     
@@ -261,7 +243,6 @@ bool is_b_inst(unsigned int iw)
     b_code = (iw >> 25) & 0b111;
 
     return (b_code == 0b101);
-
 }
 
 int branch_condition(struct arm_state *as)
@@ -301,7 +282,7 @@ int branch_condition(struct arm_state *as)
                 branch = 1;
 	    }
 	    break;
-	case 0b1110:
+	case 0b1110: // AL
 	    branch = 1;
 	    break;
     }
@@ -315,14 +296,12 @@ void armemu_b(struct arm_state *as)
     unsigned int iw = *((unsigned int *) as->regs[PC]);
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
-    unsigned int sign;
-
-    sign = (iw >> 23) & 0b1;
+    unsigned int sign = (iw >> 23) & 0b1;
 
     if(sign) 
     {
         offset = (iw | 0xFF000000);
-	offset = ((~offset) +1) * -1;
+	offset = ((~offset) + 1) * -1;
 
     } else {
         offset = (iw & 0xFFFFFF);
@@ -330,16 +309,12 @@ void armemu_b(struct arm_state *as)
     
     if(bl_bit)
     {
-        as->regs[LR] = as->regs[PC]+4;
+        as->regs[LR] = as->regs[PC] + 4;
     }
 
     /* Change the PC to the new address now */
-    unsigned int new_address = (offset*4) + 8;
-    as->regs[PC] += new_address;
-
-
+    as->regs[PC] += (offset * 4) + 8;
 }
-
 
 bool is_data_processing_inst(unsigned int iw)
 {
@@ -361,12 +336,11 @@ void armemu_data_processing(struct arm_state *as)
     unsigned int rn = (iw >> 16) & 0b1111;
     unsigned int rd = (iw >> 12) & 0b1111;
     unsigned int rm;
+
     /* Values for CMP */
     int cs, bs, result;
     long long cl, bl;
 
-	    
-    
     /* Setting RM with either immediate value or RM */
     if(!imm) {
         rm = as->regs[iw & 0xF];
@@ -387,7 +361,6 @@ void armemu_data_processing(struct arm_state *as)
         case 0b1010: //cmp
             cmp(&as->cpsr, as->regs[rn], rm);
 	    break;
-
     }
         
     if (rd != PC)
@@ -403,7 +376,6 @@ bool is_sdt_inst(unsigned int iw)
     sdt_code = (iw >> 26) & 0b11;
 
     return (sdt_code == 0b01);
-
 }
 
 void armemu_sdt(struct arm_state *as)
@@ -419,22 +391,15 @@ void armemu_sdt(struct arm_state *as)
     unsigned int imm = iw & 0xF;
     unsigned int rm_offset; 
     unsigned int target_address;
-    
-    
         
     /* Check if the rm is rm or immediate value */
     if(!immediate) {
-
 	/* Sets immediate offset */
         rm_offset = iw & 0xFFF;
-
            /* If the given value is register instead of an immediate */
     } else if(immediate) {
-
 	/* Returns offset value stored within Rm register */
         rm_offset = as->regs[iw & 0xF];
-
-       
     }
 
     /* If immediate value is negative */
@@ -449,57 +414,34 @@ void armemu_sdt(struct arm_state *as)
         target_address = rn + rm_offset;
     }
 
-    
     /* If loading from memory */
     if(loadstore) { 
-       
 	/* If it is a byte */
 	if (byteword) {
 	    as->regs[rd] =  *((unsigned char *) target_address);
-
            /* as->regs[rd] = */
 	} else if (!byteword) {
 	    /* Get the value from the stack */
-            
 	    as->regs[rd] = *((unsigned int *)target_address);
 	}
-
-
     /* If storing to memory */
     } else if(!loadstore) {
         /* Store from memory */
 	if(byteword == 1) {
 	    /* Store byte */ 
 	    *((unsigned char *)target_address) = as->regs[rd];
-            
-
 	} else if (byteword == 0) {
             /* Store word */
-
             *((unsigned int *)target_address) = as->regs[rd]; 
-
 	}
     }
     as->regs[PC] += 4;
 }
 
-
 void armemu_one(struct arm_state *as)
 {   
-    unsigned int iw;
-    
-    iw = *((unsigned int *) as->regs[PC]);
-    /* Simulate chache here*
-     * simulate_cache(cache, PC)
-     * PC
-     * slot = get_slot(size, addr)
-     * tag = get_tag(size, addr)
-     * Look at notes to see if this particular address is in the cache or not*/   
-
-    /* Cache data structure... array of cache slots
-     * Cache slot: v bit, tag */
- 
-
+    unsigned int iw = *((unsigned int *) as->regs[PC]);
+   
     if (is_bx_inst(iw)) {
 	as->branches_not_taken++;
 	as->branch_count++;
@@ -533,13 +475,13 @@ unsigned int armemu(struct arm_state *as)
     while (as->regs[PC] != 0) {
         armemu_one(as);
     }
-
     return as->regs[0];
 }   
 
 void dynamic_analysis(struct arm_state *as)
 {
-    float total_inst = as->branch_count + as->data_processing_count + as->memory_count;
+    float total_inst = 0;
+    total_inst = as->branch_count + as->data_processing_count + as->memory_count;
     float data_per = (as->data_processing_count / total_inst) * 100;
     float branch_per = (as->branch_count / total_inst) * 100;
     float mem_per = (as->memory_count / total_inst) * 100;
@@ -555,7 +497,6 @@ void dynamic_analysis(struct arm_state *as)
 
 void quadratic_emulator(struct arm_state *as)
 {
-    /* QUADRATIC */
     printf("QUADRATIC\n");
     printf("\tquadratic_c(-2,2,-3,4) =\t%d\n", quadratic_c(-2,2,-3,4));
     printf("\tquadratic_a(-2,2,-3,4) =\t%d\n", quadratic_a(-2,2,-3,4));
@@ -576,8 +517,6 @@ void quadratic_emulator(struct arm_state *as)
     printf("\tquadratic_a(9,2,-3,0) = \t%d\n", quadratic_a(9,2,-3,0));
     arm_state_init(as, (unsigned int *) quadratic_a, 9,2,-3,0);
     printf("\tquadratic_a[emu](9,2,-3,0) = \t%d\n", armemu(as));
-
-
 }
 
 int print_array(int *array, int len)
@@ -857,8 +796,8 @@ void fib_rec_emulator(struct arm_state *as)
     printf("\tfib_rec_a(20) = \t%d\n", fib_rec_a(20)); 
     arm_state_init(as, (unsigned int *) fib_rec_a, 20,0,0,0);
     printf("\tfib_rec_a[emu](20) = \t%d\n", armemu(as)); 
-      
-} 
+}
+
 void fib_iter_emulator(struct arm_state *as) 
 {
     printf("FIB_ITER\n"); 
@@ -966,9 +905,8 @@ void fib_iter_emulator(struct arm_state *as)
     printf("\tfib_iter_a(20) = \t%d\n", fib_iter_a(20)); 
     arm_state_init(as, (unsigned int *) fib_iter_a, 20,0,0,0);
     printf("\tfib_iter_a[emu](20) = \t%d\n", armemu(as));
+}
 
-   
-} 
 void strlen_emulator(struct arm_state *as)
 {
     char string[] = "Howdy There!!!";
@@ -1007,13 +945,13 @@ void strlen_emulator(struct arm_state *as)
     printf("\tstrlen_a = \t%d\n", strlen_a(string4));
     arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string4,0,0,0);
     printf("\tstrlen_a[emu] = %d\n", armemu(as));
-
 }
 
 int main(int argc, char **argv)
 {
     struct arm_state as;
-    unsigned int r;
+ 
+    /* Initialize Dynamic Analysis Values */
     dynamic_analysis_init(&as);
 
     quadratic_emulator(&as);
@@ -1022,30 +960,6 @@ int main(int argc, char **argv)
     fib_rec_emulator(&as);
     fib_iter_emulator(&as);
     strlen_emulator(&as);
-    int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
-   
-
-
-    printf("SUM_ARRAY Positive Cases\n----------------------\n");
-    r = sum_array_c(arr1, 5);
-    printf("\tsum_array_c({1,0,2,0,3}, 5) = %d\n",r);
-    print_sum_array(arr1, 5);
-
-    r = sum_array_a(arr1, 5);
-    printf("\tsum_array_a({1,0,2,0,3}, 5) = %d\n",r);
-    print_sum_array(arr1, 5);
-
-
-
-    arm_state_init(&as, (unsigned int *) find_max_a, (unsigned int) arr1,  5, 0, 0);
-    r = armemu(&as);
-    printf("armemu(find_max(1,2)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) fib_rec_a, (unsigned int) 7, 0, 0, 0);
-    r = armemu(&as);
-    printf("armemu(fib_rec(7)) = %d\n", r);
-
-
     dynamic_analysis(&as);
 
     return 0;
