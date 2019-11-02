@@ -594,7 +594,7 @@ int print_array(int *array, int len)
     printf("}\n\n");
 }
 
-/*void find_max_emulator(struct arm_state *as)
+void find_max_emulator(struct arm_state *as)
 {
     int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
     int arr2[] = {-1,-2,-3,-4};   	
@@ -602,7 +602,7 @@ int print_array(int *array, int len)
     int arr4[] = {0,0,0,0,1,2};
     int r;
 
-    /* Populate an array with 1000 elements 
+    /* Populate an array with 1000 elements */
     for(int i = 0; i < 1000; i++) {
         if(i%2 == 0) {
 	    arr3[i] = 3;
@@ -661,7 +661,7 @@ int print_array(int *array, int len)
     arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr4, 6, 0, 0);
     printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t%d\n", armemu(as));
 
-}*/
+}
 
 void print_sum_array(int *array, int len)
 {
@@ -674,10 +674,10 @@ void print_sum_array(int *array, int len)
             printf(",");
         }
     }
-    printf("}\n\n");
+    printf("}\n");
 }
 
-/*void sum_array_emulator(struct arm_state *as)
+void sum_array_emulator(struct arm_state *as)
 {
     int arr1[] = {1,0,2,0,3,1,2,3,-1,5,6,-7,8,9};
     int arr2[] = {-1,-2,-3,-4};
@@ -685,7 +685,7 @@ void print_sum_array(int *array, int len)
     int arr3[1000];
     int arr4[] = {0,0,0,0,1,2};
 
-    /* Populate an array with 1000 elements 
+    /* Populate an array with 1000 elements */
     for(int i = 0; i < 1000; i++) {
         if(i%2 == 0) {
 	    arr3[i] = 3;
@@ -696,25 +696,33 @@ void print_sum_array(int *array, int len)
 
     printf("SUM_ARRAY");
 
-    printf("SUM_ARRAY Positive Cases\n----------------------\n");
+    printf("SUM_ARRAY Positive Cases\n");
     r = sum_array_c(arr1, 5);
-    printf("\tsum_array_c({1,0,2,0,3}, 5) = %d\n",r);
+    printf("\tsum_array_c({1,0,2,0,3}, 5) = \t%d\n",r);
     print_sum_array(arr1, 5);
 
     r = sum_array_a(arr1, 5);
-    printf("\tsum_array_a({1,0,2,0,3}, 5) = %d\n",r);
+    printf("\tsum_array_a({1,0,2,0,3}, 5) = \t%d\n",r);
     print_sum_array(arr1, 5);
 
-    printf("SUM_ARRAY 1000 Length Array\n----------------------\n");
+    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr1, 5, 0, 0);
+    printf("\tquadratic_a[emu]({1,0,2,0,3}, 5) = \t%d\n", armemu(as));
+
+
+    printf("SUM_ARRAY 1000 Length Array\n");
     r = sum_array_c(arr3, 1000);
-    printf("\tsum_array_c({-2,3,-2,...,3}, 1000) = %d\n",r);
+    printf("\tsum_array_c({-2,3,-2,...,3}, 1000) = \t%d\n",r);
     print_sum_array(arr3, 25);
 
     r = sum_array_a(arr3, 1000);
-    printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = %d\n",r);
+    printf("\tsum_array_a({-2,3,-2,...,3}, 1000) = \t%d\n",r);
     print_sum_array(arr3, 25);
 
-    printf("SUM_ARRAY Negative Cases\n----------------------\n");
+    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int)arr3, 25, 0, 0);
+    printf("\tquadratic_a[emu]({-2,3,-2,...,3}, 1000) = \t%d\n", armemu(as));
+
+
+    printf("SUM_ARRAY Negative Cases\n");
     r = sum_array_c(arr2, 4);
     printf("\tsum_array_c({-1,-2,-3,-4}, 4) = %d\n",r);
     print_sum_array(arr2, 4);
@@ -723,7 +731,11 @@ void print_sum_array(int *array, int len)
     printf("\tsum_array_a({-1,-2,-3,-4}, 4) = %d\n",r);
     print_sum_array(arr2, 4);
 
-    printf("SUM_ARRAY Zero Cases\n----------------------\n");
+    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr2, 4, 0, 0);
+    printf("\tquadratic_a[emu]({-1,-2,-3,-4}, 4) = \t%d\n", armemu(as));
+
+
+    printf("SUM_ARRAY Zero Cases\n");
     r = sum_array_c(arr4, 6);
     printf("\tsum_array_c({0,0,0,0,1,2}, 6) = %d\n",r);
     print_sum_array(arr4, 6);
@@ -731,8 +743,272 @@ void print_sum_array(int *array, int len)
     r = sum_array_a(arr4, 6);
     printf("\tsum_array_a({0,0,0,0,1,2}, 6) = %d\n",r);
     print_sum_array(arr4, 6);
+    arm_state_init(as, (unsigned int *) find_max_a, (unsigned int) arr4, 6, 0, 0);
+    printf("\tquadratic_a[emu]({0,0,0,0,1,2}, 6) = \t%d\n", armemu(as));
+
     
-}*/
+}
+
+void fib_rec_emulator(struct arm_state *as) 
+{
+   
+    printf("FIB_REC\n");
+    printf("\tfib_rec_c(0) = \t\t%d\n", fib_rec_c(0));
+    printf("\tfib_rec_a(0) = \t\t%d\n", fib_rec_a(0)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 0,0,0,0);
+    printf("\tfib_rec_a[emu](0) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(1) = \t\t%d\n", fib_rec_c(1));
+    printf("\tfib_rec_a(1) = \t\t%d\n", fib_rec_a(1)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 1,0,0,0);
+    printf("\tfib_rec_a[emu](1) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(2) = \t\t%d\n", fib_rec_c(2));
+    printf("\tfib_rec_a(2) = \t\t%d\n", fib_rec_a(2)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 2,0,0,0);
+    printf("\tfib_rec_a[emu](2) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(3) = \t\t%d\n", fib_rec_c(3));
+    printf("\tfib_rec_a(3) = \t\t%d\n", fib_rec_a(3)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 3,0,0,0);
+    printf("\tfib_rec_a[emu](3) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(4) = \t\t%d\n", fib_rec_c(4));
+    printf("\tfib_rec_a(4) = \t\t%d\n", fib_rec_a(4)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 4,0,0,0);
+    printf("\tfib_rec_a[emu](4) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(5) = \t\t%d\n", fib_rec_c(5));
+    printf("\tfib_rec_a(5) = \t\t%d\n", fib_rec_a(5)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 5,0,0,0);
+    printf("\tfib_rec_a[emu](5) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(6) = \t\t%d\n", fib_rec_c(6));
+    printf("\tfib_rec_a(6) = \t\t%d\n", fib_rec_a(6));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 6,0,0,0);
+    printf("\tfib_rec_a[emu](6) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(7) = \t\t%d\n", fib_rec_c(7));
+    printf("\tfib_rec_a(7) = \t\t%d\n", fib_rec_a(7));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 7,0,0,0);
+    printf("\tfib_rec_a[emu](7) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(8) = \t\t%d\n", fib_rec_c(8));
+    printf("\tfib_rec_a(8) = \t\t%d\n", fib_rec_a(8));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 8,0,0,0);
+    printf("\tfib_rec_a[emu](8) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(9) = \t\t%d\n", fib_rec_c(9));
+    printf("\tfib_rec_a(9) = \t\t%d\n", fib_rec_a(9)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 9,0,0,0);
+    printf("\tfib_rec_a[emu](9) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(10) = \t%d\n", fib_rec_c(10));
+    printf("\tfib_rec_a(10) = \t%d\n", fib_rec_a(10)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 10,0,0,0);
+    printf("\tfib_rec_a[emu](10) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(11) = \t%d\n", fib_rec_c(11));
+    printf("\tfib_rec_a(11) = \t%d\n", fib_rec_a(11)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 11,0,0,0);
+    printf("\tfib_rec_a[emu](11) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(12) = \t%d\n", fib_rec_c(12));
+    printf("\tfib_rec_a(12) = \t%d\n", fib_rec_a(12)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 12,0,0,0);
+    printf("\tfib_rec_a[emu](12) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(13) = \t%d\n", fib_rec_c(13));
+    printf("\tfib_rec_a(13) = \t%d\n", fib_rec_a(13)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 13,0,0,0);
+    printf("\tfib_rec_a[emu](13) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(14) = \t%d\n", fib_rec_c(14));
+    printf("\tfib_rec_a(14) = \t%d\n", fib_rec_a(14)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 14,0,0,0);
+    printf("\tfib_rec_a[emu](14) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(15) = \t%d\n", fib_rec_c(15));
+    printf("\tfib_rec_a(15) = \t%d\n", fib_rec_a(15)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 15,0,0,0);
+    printf("\tfib_rec_a[emu](15) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(16) = \t%d\n", fib_rec_c(16));
+    printf("\tfib_rec_a(16) = \t%d\n", fib_rec_a(16));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 16,0,0,0);
+    printf("\tfib_rec_a[emu](16) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(17) = \t%d\n", fib_rec_c(17));
+    printf("\tfib_rec_a(17) = \t%d\n", fib_rec_a(17));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 17,0,0,0);
+    printf("\tfib_rec_a[emu](17) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(18) = \t%d\n", fib_rec_c(18));
+    printf("\tfib_rec_a(18) = \t%d\n", fib_rec_a(18));
+    arm_state_init(as, (unsigned int *) fib_rec_a, 18,0,0,0);
+    printf("\tfib_rec_a[emu](18) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_rec_c(19) = \t%d\n", fib_rec_c(19));
+    printf("\tfib_rec_a(19) = \t%d\n", fib_rec_a(19)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 19,0,0,0);
+    printf("\tfib_rec_a[emu](19) = \t%d\n", armemu(as));
+
+    printf("\tfib_rec_c(20) = \t%d\n", fib_rec_c(20));
+    printf("\tfib_rec_a(20) = \t%d\n", fib_rec_a(20)); 
+    arm_state_init(as, (unsigned int *) fib_rec_a, 20,0,0,0);
+    printf("\tfib_rec_a[emu](20) = \t%d\n", armemu(as)); 
+      
+} 
+void fib_iter_emulator(struct arm_state *as) 
+{
+    printf("FIB_ITER\n"); 
+    printf("\tfib_iter_c(0) = \t%d\n", fib_iter_c(0));
+    printf("\tfib_iter_a(0) = \t%d\n", fib_iter_a(0)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 0,0,0,0);
+    printf("\tfib_iter_a[emu](0) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(1) = \t%d\n", fib_iter_c(1));
+    printf("\tfib_iter_a(1) = \t%d\n", fib_iter_a(1)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 1,0,0,0);
+    printf("\tfib_iter_a[emu](1) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(2) = \t%d\n", fib_iter_c(2));
+    printf("\tfib_iter_a(2) = \t%d\n", fib_iter_a(2)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 2,0,0,0);
+    printf("\tfib_iter_a[emu](2) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(3) = \t%d\n", fib_iter_c(3));
+    printf("\tfib_iter_a(3) = \t%d\n", fib_iter_a(3)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 3,0,0,0);
+    printf("\tfib_iter_a[emu](3) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(4) = \t%d\n", fib_iter_c(4));
+    printf("\tfib_iter_a(4) = \t%d\n", fib_iter_a(4)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 4,0,0,0);
+    printf("\tfib_iter_a[emu](4) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(5) = \t%d\n", fib_iter_c(5));
+    printf("\tfib_iter_a(5) = \t%d\n", fib_iter_a(5)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 5,0,0,0);
+    printf("\tfib_iter_a[emu](5) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(6) = \t%d\n", fib_iter_c(6));
+    printf("\tfib_iter_a(6) = \t%d\n", fib_iter_a(6));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 6,0,0,0);
+    printf("\tfib_iter_a[emu](6) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(7) = \t%d\n", fib_iter_c(7));
+    printf("\tfib_iter_a(7) = \t%d\n", fib_iter_a(7));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 7,0,0,0);
+    printf("\tfib_iter_a[emu](7) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(8) = \t%d\n", fib_iter_c(8));
+    printf("\tfib_iter_a(8) = \t%d\n", fib_iter_a(8));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 8,0,0,0);
+    printf("\tfib_iter_a[emu](8) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(9) = \t%d\n", fib_iter_c(9));
+    printf("\tfib_iter_a(9) = \t%d\n", fib_iter_a(9)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 9,0,0,0);
+    printf("\tfib_iter_a[emu](9) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(10) = \t%d\n", fib_iter_c(10));
+    printf("\tfib_iter_a(10) = \t%d\n", fib_iter_a(10)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 10,0,0,0);
+    printf("\tfib_iter_a[emu](10) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(11) = \t%d\n", fib_iter_c(11));
+    printf("\tfib_iter_a(11) = \t%d\n", fib_iter_a(11)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 11,0,0,0);
+    printf("\tfib_iter_a[emu](11) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(12) = \t%d\n", fib_iter_c(12));
+    printf("\tfib_iter_a(12) = \t%d\n", fib_iter_a(12)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 12,0,0,0);
+    printf("\tfib_iter_a[emu](12) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(13) = \t%d\n", fib_iter_c(13));
+    printf("\tfib_iter_a(13) = \t%d\n", fib_iter_a(13)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 13,0,0,0);
+    printf("\tfib_iter_a[emu](13) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(14) = \t%d\n", fib_iter_c(14));
+    printf("\tfib_iter_a(14) = \t%d\n", fib_iter_a(14)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 14,0,0,0);
+    printf("\tfib_iter_a[emu](14) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(15) = \t%d\n", fib_iter_c(15));
+    printf("\tfib_iter_a(15) = \t%d\n", fib_iter_a(15)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 15,0,0,0);
+    printf("\tfib_iter_a[emu](15) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(16) = \t%d\n", fib_iter_c(16));
+    printf("\tfib_iter_a(16) = \t%d\n", fib_iter_a(16));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 16,0,0,0);
+    printf("\tfib_iter_a[emu](16) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(17) = \t%d\n", fib_iter_c(17));
+    printf("\tfib_iter_a(17) = \t%d\n", fib_iter_a(17));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 17,0,0,0);
+    printf("\tfib_iter_a[emu](17) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(18) = \t%d\n", fib_iter_c(18));
+    printf("\tfib_iter_a(18) = \t%d\n", fib_iter_a(18));
+    arm_state_init(as, (unsigned int *) fib_iter_a, 18,0,0,0);
+    printf("\tfib_iter_a[emu](18) = \t%d\n", armemu(as)); 
+
+    printf("\tfib_iter_c(19) = \t%d\n", fib_iter_c(19));
+    printf("\tfib_iter_a(19) = \t%d\n", fib_iter_a(19)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 19,0,0,0);
+    printf("\tfib_iter_a[emu](19) = \t%d\n", armemu(as));
+
+    printf("\tfib_iter_c(20) = \t%d\n", fib_iter_c(20));
+    printf("\tfib_iter_a(20) = \t%d\n", fib_iter_a(20)); 
+    arm_state_init(as, (unsigned int *) fib_iter_a, 20,0,0,0);
+    printf("\tfib_iter_a[emu](20) = \t%d\n", armemu(as));
+
+   
+} 
+void strlen_emulator(struct arm_state *as)
+{
+    char string[] = "Howdy There!!!";
+    char string1[] = "ssstttrrriiinnnggg";
+    char string2[] = "CS315 is Awesome";
+    char string3[] = "!@#$#$##@";
+    char string4[] = "1234567890";
+    int r;
+
+    printf("%s\n", string);
+    printf("\tstrlen_c = \t%d\n", strlen_c(string));
+    printf("\tstrlen_a = \t%d\n", strlen_a(string));
+    arm_state_init(as, (unsigned int *) strlen_a, (unsigned int) string,0,0,0);
+    printf("\tstrlen_a[emu] = %d\n", armemu(as));
+
+
+    printf("%s\n", string1);
+    r = strlen_c(string1);
+    printf("\tString length = %d\n", r);
+    r = strlen_a(string1);
+    printf("\tString length = %d\n", r);
+
+    printf("%s\n", string2);
+    r = strlen_c(string2);
+    printf("\tString length = %d\n", r);
+    r = strlen_a(string2);
+    printf("\tString length = %d\n", r);
+
+    printf("%s\n", string3);
+    r = strlen_c(string3);
+    printf("\tString length = %d\n", r);
+    r = strlen_a(string3);
+    printf("\tString length = %d\n", r);
+
+    printf("%s\n", string4);
+    r = strlen_c(string4);
+    printf("\tString length = %d\n", r);
+    r = strlen_a(string4);
+    printf("\tString length = %d\n", r);
+}
 
 int main(int argc, char **argv)
 {
@@ -741,8 +1017,14 @@ int main(int argc, char **argv)
     dynamic_analysis_init(&as);
 
     quadratic_emulator(&as);
+    sum_array_emulator(&as);
+    find_max_emulator(&as);
+    fib_rec_emulator(&as);
+    fib_iter_emulator(&as);
+    strlen_emulator(&as);
     int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
-    
+   
+
 
     printf("SUM_ARRAY Positive Cases\n----------------------\n");
     r = sum_array_c(arr1, 5);
