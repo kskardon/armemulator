@@ -9,23 +9,10 @@
 #define PC 15
 
 /* Assembly functions to emulate */
-/*int mov_a(int a, int b);
-int add_a(int a, int b);
-int sub_a(int a, int b);
-int mul_a(int a, int b);
-int cmp_a(int a, int b);
-int cmpb_a(int a, int b);
-int cmpbne_a(int a, int b);
-int cmpbeq_a(int a, int b);
-int cmpblt_a(int a, int b);
-int ldr_a(int a, int b);
-int ldrb_a(int a, int b);
-int str_a(int a, int b);
-int strb_a(int a, int b);*/
+int quadratic_c(int x, int a, int b, int c);
+int quadratic_a(int x, int a, int b, int c);
 int find_max_a(int *array, int len);
 int fib_rec_a(int n);
-/*int beq_a(int a, int b);
-int bne_a(int a, int b);*/
 
 /* The complete cpsr */
 struct cpsr_state {
@@ -558,6 +545,11 @@ void dynamic_analysis(struct arm_state *as)
 
 }
 
+void quadratic_emulator()
+{
+    
+}
+
 int main(int argc, char **argv)
 {
     struct arm_state as;
@@ -565,14 +557,22 @@ int main(int argc, char **argv)
     dynamic_analysis_init(&as);
 
     int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
+    /* QUADRATIC */
+    r = quadratic_c(-2,2,-3,4);
+    printf("quadratic_c(-2,2,-3,4) = %d\n", r);
+    r = quadratic_a(-2,2,-3,4);
+    printf("quadratic_a(-2,2,-3,4) = %d\n", r);
+    arm_state_init(&as, (unsigned int *) quadratic_a, -2, 2, -3, 4);
+    r = armemu(&as);
+    printf("quadtratic_a[emu](-2,2,-3,4) = %d\n", r);
+
+
 
     arm_state_init(&as, (unsigned int *) find_max_a, (unsigned int) arr1,  5, 0, 0);
-    arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(find_max(1,2)) = %d\n", r);
 
     arm_state_init(&as, (unsigned int *) fib_rec_a, (unsigned int) 7, 0, 0, 0);
-    arm_state_print(&as);
     r = armemu(&as);
     printf("armemu(fib_rec(7)) = %d\n", r);
 

@@ -1,18 +1,23 @@
-PROGS = find_max_a fib_rec_a
-OBJS_ARMEMU = find_max_a.o fib_rec_a.o
+PROGS = armemu_combined
+
+OBJS_ARMEMU = quadratic_a.o quadratic_c.o sum_array_a.o find_max_a.o fib_iter_a.o fib_rec_a.o strlen_a.o
+
+CFLAGS = -g
+
+%.o : %.s
+	as -o $@ $<
+
+%.o : %.c
+	gcc -c ${CFLAGS} -o $@ $<
 
 all : ${PROGS}
-find_max_a : find_max_a.s
-	as -o find_max_a.o find_max_a.s
-
-fib_rec_a : fib_rec_a.s
-	as -o fib_rec_a.o fib_rec_a.s
 
 armemu_combined : armemu_combined.c ${OBJS_ARMEMU}
-	gcc -o armemu_combined armemu_combined.c ${OBJS_ARMEMU}
+	gcc ${CGLAGS} -o $@ $^
 
-test : armemu_combined
+
+test :
 	./armemu_combined
 
 clean :
-	rm -rf armemu_combined ${OBJS_ARMEMU}
+	rm -rf ${PROGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
