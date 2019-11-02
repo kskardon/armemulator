@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define NREGS 16
 #define STACK_SIZE 1024
@@ -41,9 +42,9 @@ struct arm_state {
     unsigned char stack[STACK_SIZE];
 
     /* Dynamic Analysis: Three Types of Processing */
-    int data_processing_count;
-    int memory_count;
-    int branch_count;
+    float data_processing_count;
+    float memory_count;
+    float branch_count;
 
     /* Dynamic Analysis */
     int branches_taken;
@@ -99,6 +100,17 @@ void arm_state_init(struct arm_state *as, unsigned int *func,
     as->regs[1] = arg1;
     as->regs[2] = arg2;
     as->regs[3] = arg3;
+
+}
+
+void dynamic_analysis_init(struct arm_state *as) 
+{
+    as->data_processing_count = 0;
+    as->branch_count = 0;
+    as->memory_count = 0;
+    as->branches_taken = 0;
+    as->branches_not_taken = 0;
+
 }
 
 void arm_state_print(struct arm_state *as)
@@ -306,7 +318,6 @@ void armemu_b(struct arm_state *as)
 {
 
     unsigned int iw = *((unsigned int *) as->regs[PC]);
-    printf("WORD: %u\n", iw);
     unsigned int offset;
     unsigned int bl_bit = (iw >> 24) & 0b1;
     unsigned int sign;
@@ -322,14 +333,6 @@ void armemu_b(struct arm_state *as)
         offset = (iw & 0xFFFFFF);
     }
     
-    /* Shift bit left to truncate left bits*/
-
-    /* Shift right to preserve MSB */
-
-    
-
-    printf("OFFSET: %u", offset);
-
     if(bl_bit)
     {
         as->regs[LR] = as->regs[PC]+4;
@@ -503,6 +506,7 @@ void armemu_one(struct arm_state *as)
  
 
     if (is_bx_inst(iw)) {
+	as->branches_not_taken++;
 	as->branch_count++;
         armemu_bx(as);
     } else if (is_mul_inst(iw)) {
@@ -536,13 +540,30 @@ unsigned int armemu(struct arm_state *as)
     }
 
     return as->regs[0];
-}       
+}   
+
+void dynamic_analysis(struct arm_state *as)
+{
+    float total_inst = as->branch_count + as->data_processing_count + as->memory_count;
+    float data_per = (as->data_processing_count / total_inst) * 100;
+    float branch_per = (as->branch_count / total_inst) * 100;
+    float mem_per = (as->memory_count / total_inst) * 100;
+    printf("Dynamic Analysis:\n");
+    printf("\t# of instructions:\t%u\n", (unsigned int)total_inst);
+    printf("\t# of data processing:\t%u\t%.f%\n", (unsigned int)as->data_processing_count, data_per);
+    printf("\t# of branch:\t\t%u\t%.f%\n", (unsigned int)as->branch_count, branch_per);
+    printf("\t# of memory:\t\t%u\t%.f%\n", (unsigned int)as->memory_count, mem_per);
+    printf("\tbranches taken:\t\t%u\n", (unsigned int)as->branches_taken);
+    printf("\tbranches not taken:\t%u\n", (unsigned int)as->branches_not_taken);
+
+}
 
 int main(int argc, char **argv)
 {
     struct arm_state as;
     unsigned int r;
-    
+    dynamic_analysis_init(&as);
+
     int arr1[] = {1,0,22,0,3,1,2,3,-1,5,6,-7,8,9};
 
     arm_state_init(&as, (unsigned int *) find_max_a, (unsigned int) arr1,  5, 0, 0);
@@ -556,88 +577,7 @@ int main(int argc, char **argv)
     printf("armemu(fib_rec(7)) = %d\n", r);
 
 
-
-
-    /* Emulate add_a */
-   /*     arm_state_init(&as, (unsigned int *) sub_a, 1, 3, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(sub_a(1,1)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) mul_a, 1, 3, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(mul_a(1,1)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) mov_a, 5, 3, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(mov_a(2,1)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmp_a, 5, 3, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmp_a(2,1)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpb_a, 5, 7, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpb_a(2,1)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpbne_a, 5, 7, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpbne_a(5,7)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpbne_a, 5, 5, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpbne_a(5,5)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpbeq_a, 5, 7, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpbeq_a(5,7)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpbeq_a, 5, 5, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpbeq_a(5,5)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpblt_a, 5, 7, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpblt_a(5,7)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) cmpblt_a, 5, 5, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(cmpblt_a(5,5)) = %d\n", r);
-
-    int arr[2] = {1,2};
-    arm_state_init(&as, (unsigned int *) ldr_a, 5, arr, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(ldr_a(5,5)) = %d\n", r);
-
-    arm_state_init(&as, (unsigned int *) str_a, 8, 5, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(str_a(5,5)) = %d\n", r);
-
-    char test_string[] = 'iw';
-    arm_state_init(&as, (unsigned int *) strb_a, 8, test_string, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(strb_a(8, 12)) = %d\n", r);
-   
-    arm_state_init(&as, (unsigned int *) ldrb_a, 27, test_string, 0, 0);
-    arm_state_print(&as);
-    r = armemu(&as);
-    printf("armemu(ldrb_a(8, 12)) = %d\n", r);*/
-
-    
-
+    dynamic_analysis(&as);
 
     return 0;
 }
