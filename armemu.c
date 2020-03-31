@@ -31,18 +31,6 @@ struct cpsr_state {
     int V;
 };
 
-struct cache_slot {
-    unsigned int v;
-    unsigned int tag;
-};
-
-struct cache_direct_mapped {
-    struct cache_slot *slots;
-    int hits;
-    int misses;
-    int requests;
-};
-
 /* The complete machine as */
 struct arm_state {
     unsigned int regs[NREGS];
@@ -58,18 +46,11 @@ struct arm_state {
     int branches_taken;
     int branches_not_taken;
 
-    /* Cache */
-    struct cache_direct_mapped dmc;
-    unsigned int cache_size = 32;
+    /* Cache values */
+    int request_count;
+    int hit_count;
+    int miss_count;
 };
-
-int cache_direct_mapped_init(struct cache_direct_mapped *dmc) {
-    
-    dmc->hits = 0;
-    dmc->misses = 0;
-    dmc->requests = 0;
-    dmc->slots (struct cache_slot *) malloc(sizeof(struct cache_slot) * cache_size);
-}
 
 /* Initialize cpsr as */
 int init_cpsr_state(struct cpsr_state *cpsr)
@@ -699,94 +680,20 @@ void strlen_emulator(struct arm_state *as)
     dynamic_analysis(as);
 }
 
-unsigned int get_slot(unsigned int cache_size, unsigned int address) 
-{
-    return ((address >> 2) & (cache_size - 1));
-}
-
-int get_tag(unsigned int cache_size, unsigned int address) 
-{ 
-
-    /*TODO: fill in */	
-}
-
-int get_cache_vbit(struct arm_state *as, int slot) 
-{
-    return as->dmc.slots[slot].v;
-}
-
-int get_cache_tag(struct arm_state *as, int slot) 
-{
-    return as->dmc.slots[slot].tag;
-}
-
-void update_cache(struct arm_state *as, int slot, int tag) 
-{
-    as->dmc.slots[slot].v = 1;
-    as->dmc.slots[slot].tag = tag;
-}
-
-void simulate_cache(struct arm_state *as, unsigned int address) 
-{
-    unsigned int slot = get_slot(state->cache_size, address);
-    unsigned int tag = get_tag(state->cache_size, address);
-    unsigned int v = get_cache_vbit(as, slot);
-    unsigned int tag_c = get_cache_tag(as, slot); 
-
-    if (!v) {
-        as->dmc.misses++;
-	update_cache(as, slot, tag);
-    } else {
-        if (tag == tag_c){
-        state->dmc.hits++;
-        } else {
-            state->dmc.misses++;
-            update_cache(as, slot, tag);
-        }
-    }
-    as->dmc.requests++;
-}
-
-void check_cache_size(int argc, char **argv, struct arm_state *as) 
-{
-    /* Sort through each argument */
-    for(int i = 0; i < argc; i++) {
-        /* If arg is tag -c */
-    	printf(argv[i]);
-        exit(0);	
-        if(argv[i][0] == '-' && argv[i][1] == 'c') {
-
-	    printf("GOT HERE: %s", argv[i+1]);
-
-	   /* int arg_to_int = str_to_int((argv[i + 1]));	
-            /* If cache_size is divisible by 2
-    	    if(arg_to_int%2 == 0) {
-		/* Store the cache_size in the struct 
-	        as->cache_size = (unsigned int) argv[i+1];
-	    } else {
-	        printf("Error: given cache size must be 2^N.");
-		exit(0);
-	    }
-	} else {
-	    printf("Error: No cache size given.");
-	    exit(0);*/
-	}
-    }
-}
-
 int main(int argc, char **argv)
 {
     struct arm_state as;
 
     /* Intake size for cache here */
-    check_cache_size(argc, argv, &as);
- 
+    dynamic_analysis_init(&as);
+
     quadratic_emulator(&as);
     sum_array_emulator(&as);
     find_max_emulator(&as);
     fib_rec_emulator(&as);
     fib_iter_emulator(&as);
     strlen_emulator(&as);
+    dynamic_analysis(&as);
    
     return 0;
 }
