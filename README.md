@@ -1,4 +1,4 @@
-# project04-yay
+# armemulator
 
 TO COMPILE:
     1. enter directory
