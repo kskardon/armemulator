@@ -21,4 +21,3 @@ test :
 
 clean :
 	rm -rf ${PROGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
-	git rm ${PROGS} ${OBJS_ANALYZE} ${OBJS_ARMEMU}
